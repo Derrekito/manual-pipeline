@@ -1,0 +1,119 @@
+% Core packages and Pandoc-specific patches
+% manual-pipeline: Centralized documentation pipeline
+\usepackage[letterpaper, top=0.5in, bottom=1in, left=1in, right=1in, includeheadfoot]{geometry}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[printonlyused,noforwardlinks]{acronym}
+% Fix "Bad space factor" error when \Ac is used at paragraph start
+\let\origAc\Ac
+\renewcommand{\Ac}[1]{\leavevmode\origAc{#1}}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{import}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xurl}
+\urlstyle{same}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{longtable}
+\usepackage{newunicodechar}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{color,soul}
+\usepackage{pifont}
+\usepackage{minted}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, shapes.misc}
+
+% TikZ styles for test setup diagrams
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text centered, rounded corners, minimum height=3em]
+\tikzstyle{network} = [rectangle, draw, fill=blue!20, text centered, rounded corners, minimum height=3em, font=\faNetworkWired]
+\tikzstyle{icon} = [align=center, font=\Huge, text centered, minimum width=0cm, minimum height=0cm]
+\tikzstyle{data} = [trapezium, trapezium left angle=70, trapezium right angle=110, draw, fill=orange!20, text centered, minimum height=3em, minimum width=3cm, text width=2.5cm]
+\tikzstyle{arrow_data_twoway} = [thick,<->,>=latex, draw=blue, dashed]
+\tikzstyle{arrow_data_oneway} = [thick,->,>=latex, draw=blue, dashed]
+\tikzstyle{arrow_power} = [thick,->,>=latex, draw=red]
+\tikzstyle{arrow_beam} = [thick,->,>=o, draw=black, dashed]
+\usepackage{fontawesome5}
+\usepackage{titling}
+\usepackage{fancyhdr, lastpage}
+\usepackage[base]{babel}
+\usepackage{tocloft}
+\usepackage[flushleft]{threeparttable}
+\usepackage{multicol, multirow}
+\usepackage{booktabs}
+\usepackage[numbib]{tocbibind}
+
+% fontspec must come before hyperref for lualatex
+\usepackage{fontspec}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    filecolor=blue,
+    urlcolor=blue,
+    pdfborder={0 0 0}
+}
+
+\usepackage{cleveref}
+
+% Fix for acronym + cleveref conflict in TexLive 2025
+% https://tex.stackexchange.com/questions/735520
+\makeatletter
+\AtBeginDocument{%
+  \def\ltx@label#1{\cref@label{#1}}%
+  \def\label@in@display@noarg#1{\cref@old@label@in@display{#1}}%
+}
+\makeatother
+
+% Header/Footer setup
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{0.17in}
+\setlength{\headsep}{0.33in}
+\setlength{\footskip}{0.5in}
+
+% Pandoc image scaling patch
+$if(graphics)$
+\makeatletter
+\newsavebox\pandoc@box%
+\newcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi%
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}%
+\def\fps@figure{htbp}%
+\makeatother%
+$endif$
+
+\lstdefinestyle{pseudocode}{
+    language=,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{purple},
+    emphstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    captionpos=b,
+    showstringspaces=false,
+    morekeywords={For, If, Else, End, Within},
+}

@@ -1,0 +1,104 @@
+# manual-pipeline/Makefile.include
+# Include this file from your project's manual/Makefile
+#
+# Required variables (set before including):
+#   PROJECT_NAME    - Name of the project (e.g., "radcast", "sparcl")
+#   MANUAL_DIR      - Path to the project's manual directory
+#   PIPELINE_DIR    - Path to the manual-pipeline directory
+#
+# Optional variables:
+#   MASTER_DOC      - Path to main markdown file (default: $(MANUAL_DIR)/$(PROJECT_NAME)-manual.md)
+#   EXTRA_DEPS      - Additional dependencies for PDF/DOCX targets
+
+# Validate required variables
+ifndef PROJECT_NAME
+$(error PROJECT_NAME is not set. Set it before including Makefile.include)
+endif
+ifndef MANUAL_DIR
+$(error MANUAL_DIR is not set. Set it before including Makefile.include)
+endif
+ifndef PIPELINE_DIR
+$(error PIPELINE_DIR is not set. Set it before including Makefile.include)
+endif
+
+# Derived paths
+MASTER_DOC ?= $(MANUAL_DIR)/$(PROJECT_NAME)-manual.md
+BUILD_DIR := $(MANUAL_DIR)/build
+OUTPUT_DIR := $(MANUAL_DIR)/output
+VENV_DIR := $(MANUAL_DIR)/venv
+SCRIPTS_DIR := $(PIPELINE_DIR)/scripts
+
+# Output files
+PDF_OUTPUT := $(OUTPUT_DIR)/$(PROJECT_NAME)-manual.pdf
+DOCX_OUTPUT := $(OUTPUT_DIR)/$(PROJECT_NAME)-manual.docx
+
+# Marker file for setup completion
+SETUP_MARKER := $(VENV_DIR)/.setup_complete
+
+# Source file patterns
+DOC_FILES := $(wildcard $(MANUAL_DIR)/docs/*.md)
+LATEX_FILES := $(wildcard $(MANUAL_DIR)/latex/*.tex) $(wildcard $(PIPELINE_DIR)/latex/*.latex)
+FILTER_FILES := $(wildcard $(PIPELINE_DIR)/latex/filters/*.lua) $(wildcard $(PIPELINE_DIR)/latex/filters/*.py)
+
+# Export for scripts
+export MANUAL_DIR
+export PIPELINE_DIR
+
+.PHONY: all help pdf docx setup check-deps clean distclean
+
+all: pdf
+
+help:
+	@echo "$(PROJECT_NAME) Manual Generation (using manual-pipeline)"
+	@echo ""
+	@echo "Targets:"
+	@echo "  make pdf        - Generate PDF manual"
+	@echo "  make docx       - Generate DOCX manual"
+	@echo "  make setup      - Install dependencies (auto-runs on first build)"
+	@echo "  make check-deps - Verify system dependencies"
+	@echo "  make clean      - Remove build artifacts"
+	@echo "  make distclean  - Remove all generated files including venv"
+	@echo ""
+	@echo "Output: $(OUTPUT_DIR)/"
+
+# Setup marker - created after check-deps succeeds
+$(SETUP_MARKER):
+	@echo "Running first-time setup..."
+	@$(SCRIPTS_DIR)/check_deps.sh
+	@mkdir -p $(VENV_DIR)
+	@touch $(SETUP_MARKER)
+
+setup: $(SETUP_MARKER)
+	@echo "Setup complete."
+
+check-deps:
+	@$(SCRIPTS_DIR)/check_deps.sh
+	@touch $(SETUP_MARKER)
+
+# PDF depends on setup marker - auto-runs setup if needed
+$(PDF_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(EXTRA_DEPS)
+	@$(SCRIPTS_DIR)/create_pdf.sh $(MASTER_DOC) 1 pdf
+	@echo ""
+	@echo "Manual generated: $(PDF_OUTPUT)"
+
+pdf: $(PDF_OUTPUT)
+
+# DOCX depends on setup marker - auto-runs setup if needed
+$(DOCX_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(EXTRA_DEPS)
+	@$(SCRIPTS_DIR)/create_pdf.sh $(MASTER_DOC) 1 docx
+	@echo ""
+	@echo "Manual generated: $(DOCX_OUTPUT)"
+
+docx: $(DOCX_OUTPUT)
+
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@echo "Clean complete."
+
+distclean: clean
+	@echo "Removing all generated files..."
+	@rm -rf $(OUTPUT_DIR)
+	@rm -rf $(VENV_DIR)
+	@rm -f $(SETUP_MARKER)
+	@echo "Distclean complete."

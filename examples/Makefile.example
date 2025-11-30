@@ -1,0 +1,33 @@
+# Example project Makefile for manual-pipeline
+# Copy this to your project's manual/ directory and customize
+
+# Required: Set your project name (used for output filenames)
+PROJECT_NAME := myproject
+
+# Required: Path to this manual directory
+MANUAL_DIR := $(shell pwd)
+
+# Required: Path to manual-pipeline
+# Option 1: Absolute path
+# PIPELINE_DIR := $(HOME)/Projects/manual-pipeline
+#
+# Option 2: Relative path (if manual-pipeline is a submodule at manual/pipeline)
+# PIPELINE_DIR := $(MANUAL_DIR)/pipeline
+#
+# Option 3: Environment variable
+# PIPELINE_DIR := $(MANUAL_PIPELINE_DIR)
+PIPELINE_DIR := $(HOME)/Projects/manual-pipeline
+
+# Optional: Override the master document path
+# MASTER_DOC := $(MANUAL_DIR)/custom-name.md
+
+# Optional: Add extra dependencies (e.g., README.md from project root)
+# EXTRA_DEPS := $(MANUAL_DIR)/../README.md
+
+# Include the pipeline rules
+include $(PIPELINE_DIR)/Makefile.include
+
+# Add any project-specific targets below
+# Example:
+# diagrams:
+# 	@echo "Generating diagrams..."

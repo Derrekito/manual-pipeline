@@ -1,0 +1,19 @@
+{
+  "name": "manual-pipeline",
+  "version": "1.0.0",
+  "description": "Centralized Pandoc + LaTeX documentation pipeline for generating PDF/DOCX manuals from Markdown.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "10.9.1"
+  }
+}

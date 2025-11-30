@@ -1,0 +1,66 @@
+% Title page layout
+\begin{titlepage}
+  \centering
+  \vspace*{1cm}
+  {\Huge $title$}\par
+  $if(subtitle)$
+    \vspace{1.5cm}
+    {\Large $subtitle$}\par
+  $endif$
+  $if(author)$
+    \vspace{2cm}
+    {\Large $author$$if(email)$\\ {\small\href{$email$}{$email$}} $endif$}\par
+  $endif$
+  \vfill
+  $if(version)$
+    {\large Version $version$}\par
+    \vspace{0.5cm}
+  $endif$
+  $if(date)$
+    {\large $date$}\par
+  $endif$
+  $if(disclaimer)$
+    \vspace*{3cm}
+    $disclaimer$
+  $endif$
+  $if(govlogo)$
+    \hfill
+    \includegraphics[width=0.17\textwidth]{USSF_logo.pdf}
+    \hfill
+    \includegraphics[width=0.25\textwidth]{US_Air_Force_Logo_Solid_Colour.pdf}
+    \hfill\break\break
+    \includegraphics[width=0.6\textwidth]{afrl-the-air-force-research-laboratory-logo-vector.pdf}
+  $endif$
+  $if(avlogo)$$if(unmlogo)$
+    \vfill
+    \hfill
+    \includegraphics[height=1.2cm]{avinc_black_blue.pdf}
+    \hfill
+    \includegraphics[height=1.2cm]{University_of_New_Mexico_logo.pdf}
+    \hfill\break
+  $endif$$endif$
+  $if(avlogo)$$if(unmlogo)$$else$
+    \vfill
+    \hfill
+    \includegraphics[height=1.2cm]{avinc_black_blue.pdf}
+    \hfill\break
+  $endif$$endif$
+  $if(unmlogo)$$if(avlogo)$$else$
+    \vfill
+    \hfill
+    \includegraphics[height=1.2cm]{University_of_New_Mexico_logo.pdf}
+    \hfill\break
+  $endif$$endif$
+  $if(distro)$
+    $if(unmlogo)$$else$$if(avlogo)$$else$
+      \vfill
+    $endif$$endif$
+    {$distro$}\par
+  $endif$
+  $if(rev)$
+    \vspace{1cm}
+    \begin{center}
+      \textbf{Rev. $rev$}
+    \end{center}
+  $endif$
+\end{titlepage}

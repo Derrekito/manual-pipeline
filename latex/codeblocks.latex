@@ -1,0 +1,136 @@
+\usepackage{minted}
+\usemintedstyle{tango}
+
+% Define the background color
+\definecolor{codebg}{rgb}{0.95,0.95,0.92}
+
+% Configure minted
+\setminted{%
+    fontsize=\footnotesize,
+    linenos=true,
+    breaklines=true,
+    numbersep=10pt
+}
+% Use the custom font for all minted environments
+\fvset{formatcom=\codefont}
+
+% Set minted lineno size
+\renewcommand{\theFancyVerbLine}{\scriptsize\arabic{FancyVerbLine}}
+
+\usepackage[most, minted]{tcolorbox}
+
+\newtcblisting{myminted}[2][]{%
+    boxsep=2pt,
+    left=8mm,
+    listing engine=minted,
+    minted language=#2,
+    listing only,
+    breakable,
+    enhanced,
+    minted options = {%
+        linenos,
+        breaklines=true,
+        breakbefore=.,
+        fontsize=\footnotesize,
+        numbersep=2mm
+    },
+    overlay = {%
+        \begin{tcbclipinterior}
+            \fill[gray!25] (interior.north west) rectangle ([xshift=8mm]interior.south west);
+        \end{tcbclipinterior}
+    },
+    #1
+}
+
+% Terminal-style for bash/shell commands (Rosé Pine Moon theme)
+\definecolor{rpbase}{HTML}{232136}
+\definecolor{rpsurface}{HTML}{2a273f}
+\definecolor{rpoverlay}{HTML}{393552}
+\definecolor{rphighmed}{HTML}{44415a}
+\definecolor{rptext}{HTML}{e0def4}
+\definecolor{rpmuted}{HTML}{6e6a86}
+\definecolor{rpsubtle}{HTML}{908caa}
+\definecolor{rpfoam}{HTML}{9ccfd8}
+\definecolor{rpiris}{HTML}{c4a7e7}
+\definecolor{rpgold}{HTML}{f6c177}
+\definecolor{rppine}{HTML}{3e8fb0}
+\definecolor{rprose}{HTML}{ea9a97}
+\definecolor{rplove}{HTML}{eb6f92}
+
+% Terminal with language bar - matches myminted theme with title
+\newtcblisting{terminal}[2][]{%
+    boxsep=2pt,
+    left=8mm,
+    listing engine=minted,
+    minted language=#2,
+    listing only,
+    breakable,
+    enhanced,
+    arc=4pt,
+    boxrule=0.5pt,
+    colframe=gray!50,
+    fonttitle=\footnotesize\ttfamily,
+    coltitle=white,
+    colbacktitle=gray!60,
+    attach boxed title to top right={yshift=-2mm, xshift=-4mm},
+    boxed title style={arc=2pt, boxrule=0pt},
+    title=#2,
+    minted options = {%
+        linenos,
+        breaklines=true,
+        breakbefore=.,
+        fontsize=\footnotesize,
+        numbersep=2mm
+    },
+    overlay = {%
+        \begin{tcbclipinterior}
+            \fill[gray!25] (interior.north west) rectangle ([xshift=8mm]interior.south west);
+        \end{tcbclipinterior}
+    },
+    #1
+}
+
+% Non-breaking version for diagrams - won't break across pages, no line numbers
+\newtcblisting{mymintednobreak}[2][]{%
+    boxsep=4pt,
+    left=4mm,
+    right=4mm,
+    listing engine=minted,
+    minted language=#2,
+    listing only,
+    unbreakable,
+    enhanced,
+    arc=4pt,
+    boxrule=0.5pt,
+    colframe=gray!50,
+    minted options = {%
+        linenos=false,
+        breaklines=true,
+        fontsize=\footnotesize
+    },
+    #1
+}
+
+% Custom inputminted command for file inclusions
+\NewDocumentCommand{\myinputminted}{O{} m m}{%
+    \begin{tcolorbox}[%
+        boxsep=2pt,
+        left=8mm,
+        breakable,
+        enhanced,
+        overlay = {%
+            \begin{tcbclipinterior}
+                \fill[gray!25] (interior.north west) rectangle ([xshift=8mm]interior.south west);
+            \end{tcbclipinterior}
+        },
+        #1
+    ]
+    \inputminted[%
+        linenos,
+        breaklines=true,
+        breakbefore=.,
+        fontsize=\footnotesize,
+        numbersep=2mm%
+    ]{#2}{#3}
+    \end{tcolorbox}
+}

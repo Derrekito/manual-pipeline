@@ -1,0 +1,141 @@
+% Font configuration for LuaLaTeX
+\usepackage{fontspec}
+
+% Set up emoji support using a fallback font
+\newfontfamily{\emojifont}{Noto Color Emoji}[Renderer=HarfBuzz]
+
+\setmainfont[
+  Ligatures=TeX,
+  Renderer=Basic,
+  SmallCapsFont={TeX Gyre Termes},
+  SmallCapsFeatures={Letters=SmallCaps},
+]{TeX Gyre Termes}
+
+\setmonofont[
+  Renderer=Basic
+]{TeX Gyre Cursor}
+
+% Unicode character mappings
+\newunicodechar{⚙}{{\emojifont ⚙}}
+\newunicodechar{⚠}{{\emojifont ⚠}}
+\newunicodechar{✅}{{\emojifont ✅}}
+\newunicodechar{✓}{{\emojifont ✓}}
+\newunicodechar{✨}{{\emojifont ✨}}
+\newunicodechar{❌}{{\emojifont ❌}}
+\newunicodechar{❤}{{\emojifont ❤}}
+\newunicodechar{❯}{{\emojifont ❯}}
+\newunicodechar{🌐}{{\emojifont 🌐}}
+\newunicodechar{👉}{{\emojifont 👉}}
+\newunicodechar{👍}{{\emojifont 👍}}
+\newunicodechar{💡}{{\emojifont 💡}}
+\newunicodechar{📂}{{\emojifont 📂}}
+\newunicodechar{📃}{{\emojifont 📃}}
+\newunicodechar{📊}{{\emojifont 📊}}
+\newunicodechar{📋}{{\emojifont 📋}}
+\newunicodechar{📌}{{\emojifont 📌}}
+\newunicodechar{📖}{{\emojifont 📖}}
+\newunicodechar{📘}{{\emojifont 📘}}
+\newunicodechar{📚}{{\emojifont 📚}}
+\newunicodechar{📦}{{\emojifont 📦}}
+\newunicodechar{🔄}{{\emojifont 🔄}}
+\newunicodechar{🔍}{{\emojifont 🔍}}
+\newunicodechar{🔐}{{\emojifont 🔐}}
+\newunicodechar{🔒}{{\emojifont 🔒}}
+\newunicodechar{🔓}{{\emojifont 🔓}}
+\newunicodechar{🔗}{{\emojifont 🔗}}
+\newunicodechar{🔥}{{\emojifont 🔥}}
+\newunicodechar{🔧}{{\emojifont 🔧}}
+\newunicodechar{🔩}{{\emojifont 🔩}}
+\newunicodechar{🕒}{{\emojifont 🕒}}
+\newunicodechar{🖥}{{\emojifont 🖥}}
+\newunicodechar{🗂}{{\emojifont 🗂}}
+\newunicodechar{🚀}{{\emojifont 🚀}}
+\newunicodechar{🛠}{{\emojifont 🛠}}
+\newunicodechar{🟢}{{\emojifont 🟢}}
+\newunicodechar{🧪}{{\emojifont 🧪}}
+\newunicodechar{🧬}{{\emojifont 🧬}}
+\newunicodechar{🧱}{{\emojifont 🧱}}
+\newunicodechar{【}{{\emojifont 【}}
+\newunicodechar{】}{{\emojifont 】}}
+% Mathematical symbols
+\newunicodechar{•}{\textbullet}
+\newunicodechar{≥}{\ensuremath{\geq}}
+\newunicodechar{≤}{\ensuremath{\leq}}
+\newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{∞}{\ensuremath{\infty}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{≠}{\ensuremath{\neq}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{Φ}{\ensuremath{\Phi}}
+\newunicodechar{χ}{\ensuremath{\chi}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+
+\newfontfamily{\codefont}{FiraCode}[
+    Path            = ./assets/Fonts/,
+    Extension       = .ttf,
+    UprightFont     = *-Regular,
+    BoldFont        = *-Bold,
+    Renderer        = Basic,
+]
+
+\emergencystretch=9pt
+\interlinepenalty=100
+\hyphenpenalty=9999
+
+\microtypecontext{spacing=nonfrench}
+
+\microtypesetup{%
+    activate={true, nocompatibility},
+    protrusion=true,
+    tracking=false,
+    kerning=false,
+    spacing=false,
+    stretch=10,
+    shrink=10,
+    factor=1100,
+    verbose=errors,
+    expansion=true
+}
+
+\SetProtrusion{%
+    encoding={*},
+    family={ptm},
+    series={*},
+    size={6,7}%
+}{%
+    1={ ,750},
+    2={ ,500},
+    3={ ,500},
+    4={ ,500},
+    5={ ,500},
+    6={ ,500},
+    7={ ,600},
+    8={ ,500},
+    9={ ,500},
+    0={ ,500}%
+}
+
+\SetExtraKerning[unit=space]{%
+    encoding={*},
+    family={ntx},
+    series={*},
+    size={%
+        footnotesize,
+        small,
+        normalsize,
+        tiny,
+        Large,
+        Huge,
+        large%
+    }%
+}{%
+    \textendash={400,400},
+    "28={ ,150},
+    "29={150, },
+    \textquotedblleft={ ,150},
+    \textquotedblright={150, }
+}
