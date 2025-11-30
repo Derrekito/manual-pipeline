@@ -66,8 +66,10 @@ generate_tex() {
     mkdir -p "${BUILD_DIR}"
 
     # Preprocess markdown to protect \ac{} commands from pandoc escape interpretation
-    local preprocessed="${BUILD_DIR}/$(basename "${IN_FILE}" .md)_preprocessed.md"
+    # Keep in same directory as original so relative !include paths still work
+    local preprocessed="${IN_DIR}/.$(basename "${IN_FILE}" .md)_preprocessed.md"
     "${PIPELINE_DIR}/scripts/preprocess-acronyms.sh" "${IN_FILE}" > "${preprocessed}"
+    trap "rm -f '${preprocessed}'" EXIT
 
     local pandoc_cmd="pandoc \"${preprocessed}\" --from markdown+raw_tex --template=\"${template}\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/include-files.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/readme-only.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/notebook-toggle.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/nobreak-codeblock.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/md-links-to-refs.lua\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-mermaid.py\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-minted.py\" --highlight-style=pygments --trace --data-dir=\"${PROJECT_ROOT}\" --metadata output_dir=\"${MERMAID_OUTPUT_DIR}\" --verbose"
     [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=" --toc"
