@@ -4,10 +4,6 @@ ${ codeblocks() }
 ${ fonts() }
 ${ styles() }
 
-$if(bibliography)$
-\addbibresource{$bibliography$}
-$endif$
-
 \newcommand{\passthrough}[1]{#1}
 
 % Set default scaling for images to not exceed max width or height while keeping aspect ratio
@@ -58,7 +54,7 @@ $endif$
 
 $body$
 
-$if(bibliography)$
+$if(bib)$
 \printbibliography
 $endif$
 \end{document}
