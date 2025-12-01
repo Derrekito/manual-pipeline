@@ -16,11 +16,12 @@ fi
 BUILD_DIR="${MANUAL_DIR}/build"
 PROJECT_ROOT="${MANUAL_DIR}/.."
 
-export TEXINPUTS="${MANUAL_DIR}/assets/logos:${MANUAL_DIR}/assets/Fonts:"
-export LUAFONTDIR="${MANUAL_DIR}/assets/Fonts"
-export MERMAID_FILTER_CONFIG="${MANUAL_DIR}/config/mermaid-config.json"
-export MERMAID_FILTER_MERMAID_CSS="${MANUAL_DIR}/config/mermaid.css"
-export MERMAID_BIN="${MANUAL_DIR}/node_modules/.bin/mmdc"
+# Use pipeline assets for fonts/logos, with project assets as fallback for custom logos
+export TEXINPUTS="${MANUAL_DIR}/assets/logos:${PIPELINE_DIR}/assets/logos:${PIPELINE_DIR}/assets/Fonts:"
+export LUAFONTDIR="${PIPELINE_DIR}/assets/Fonts"
+export MERMAID_FILTER_CONFIG="${PIPELINE_DIR}/config/mermaid-config.json"
+export MERMAID_FILTER_MERMAID_CSS="${PIPELINE_DIR}/config/mermaid.css"
+export MERMAID_BIN="${PIPELINE_DIR}/node_modules/.bin/mmdc"
 export MERMAID_OUTPUT_DIR="${BUILD_DIR}/mermaid_images"
 
 check_usage() {
@@ -47,8 +48,8 @@ setup_paths() {
     mkdir -p "${BUILD_DIR}" || { echo "Failed to create ${BUILD_DIR}"; exit 1; }
     mkdir -p "${MERMAID_SUBDIR}" || { echo "Failed to create ${MERMAID_SUBDIR}"; exit 1; }
 
-    # Symlink assets into build directory for LaTeX to find fonts
-    [ ! -L "${BUILD_DIR}/assets" ] && [ -d "${MANUAL_DIR}/assets" ] && ln -sf "${MANUAL_DIR}/assets" "${BUILD_DIR}/assets"
+    # Symlink pipeline assets into build directory for LaTeX to find fonts
+    [ ! -L "${BUILD_DIR}/assets" ] && [ -d "${PIPELINE_DIR}/assets" ] && ln -sf "${PIPELINE_DIR}/assets" "${BUILD_DIR}/assets"
 }
 
 print_log_locations() {
