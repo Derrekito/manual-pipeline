@@ -1,8 +1,8 @@
 % Title page layout
 \begin{titlepage}
   \centering
-  \vspace*{1cm}
-  {\Huge $title$}\par
+  \vspace*{2cm}
+  {\Huge\bfseries $title$}\par
   $if(subtitle)$
     \vspace{1.5cm}
     {\Large $subtitle$}\par
@@ -20,10 +20,11 @@
     {\large $date$}\par
   $endif$
   $if(disclaimer)$
-    \vspace*{3cm}
-    $disclaimer$
+    \vspace{2cm}
+    {\small $disclaimer$}
   $endif$
   $if(govlogo)$
+    \vfill
     \hfill
     \includegraphics[width=0.17\textwidth]{USSF_logo.pdf}
     \hfill
@@ -34,21 +35,21 @@
   $if(avlogo)$$if(unmlogo)$
     \vfill
     \hfill
-    \includegraphics[height=1.2cm]{avinc_black_blue.pdf}
+    \includegraphics[width=0.25\textwidth]{avinc_black_blue.pdf}
     \hfill
-    \includegraphics[height=1.2cm]{University_of_New_Mexico_logo.pdf}
+    \includegraphics[width=0.25\textwidth]{University_of_New_Mexico_logo.pdf}
     \hfill\break
   $endif$$endif$
   $if(avlogo)$$if(unmlogo)$$else$
     \vfill
     \hfill
-    \includegraphics[height=1.2cm]{avinc_black_blue.pdf}
+    \includegraphics[width=0.25\textwidth]{avinc_black_blue.pdf}
     \hfill\break
   $endif$$endif$
   $if(unmlogo)$$if(avlogo)$$else$
     \vfill
     \hfill
-    \includegraphics[height=1.2cm]{University_of_New_Mexico_logo.pdf}
+    \includegraphics[width=0.25\textwidth]{University_of_New_Mexico_logo.pdf}
     \hfill\break
   $endif$$endif$
   $if(distro)$
