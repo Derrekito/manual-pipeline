@@ -55,6 +55,9 @@
 % fontspec must come before hyperref for lualatex
 \usepackage{fontspec}
 
+% Bibliography support with biblatex/biber
+\usepackage[backend=biber,style=ieee,sorting=none,labeldateparts,maxbibnames=999,maxcitenames=2,mincitenames=1]{biblatex}
+
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
