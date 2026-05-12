@@ -49,13 +49,18 @@ abstract: |
 
 ### Logo Options
 
+Logos are configured via `logos.yaml` in the pipeline root directory. Copy `logos.yaml.example` to `logos.yaml` and customize for your organization.
+
+Each logo defined in `logos.yaml` becomes a frontmatter boolean:
+
 ```yaml
 ---
-govlogo: true    # Include government logo
-avlogo: true     # Include company logo
-unmlogo: true    # Include UNM logo
+myorglogo: true     # Enable your custom logo
+partnerlogo: true   # Enable partner logo
 ---
 ```
+
+See `logos.yaml.example` for the logo configuration format.
 
 ### Bibliography
 
@@ -85,8 +90,6 @@ version: "2.0.0"
 toc: true
 secnum: true
 acronyms: true
-govlogo: true
-avlogo: true
 bibfile: latex/references.bib
 abstract: |
   This manual documents the RADCaST system for radiation

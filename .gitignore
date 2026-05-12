@@ -3,6 +3,18 @@ build/
 output/
 venv/
 
+# Organization-specific configuration
+logos.yaml
+assets/logos/*.pdf
+assets/logos/*.png
+assets/logos/*.jpg
+assets/logos/*.svg
+
+# Exception: example files (allowed in repo)
+!assets/logos/Mushroom.svg
+!assets/logos/Mushroom.pdf
+!assets/logos/ATTRIBUTION.md
+
 # Python
 __pycache__/
 *.pyc
@@ -20,3 +32,4 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+logos-government.yaml

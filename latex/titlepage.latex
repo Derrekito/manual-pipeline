@@ -23,39 +23,13 @@
     \vspace{2cm}
     {\small $disclaimer$}
   $endif$
-  $if(govlogo)$
-    \vfill
-    \hfill
-    \includegraphics[width=0.17\textwidth]{USSF_logo.pdf}
-    \hfill
-    \includegraphics[width=0.25\textwidth]{US_Air_Force_Logo_Solid_Colour.pdf}
-    \hfill\break\break
-    \includegraphics[width=0.6\textwidth]{afrl-the-air-force-research-laboratory-logo-vector.pdf}
+  $if(logo-block)$
+$logo-block$
   $endif$
-  $if(avlogo)$$if(unmlogo)$
-    \vfill
-    \hfill
-    \includegraphics[width=0.25\textwidth]{avinc_black_blue.pdf}
-    \hfill
-    \includegraphics[width=0.25\textwidth]{University_of_New_Mexico_logo.pdf}
-    \hfill\break
-  $endif$$endif$
-  $if(avlogo)$$if(unmlogo)$$else$
-    \vfill
-    \hfill
-    \includegraphics[width=0.25\textwidth]{avinc_black_blue.pdf}
-    \hfill\break
-  $endif$$endif$
-  $if(unmlogo)$$if(avlogo)$$else$
-    \vfill
-    \hfill
-    \includegraphics[width=0.25\textwidth]{University_of_New_Mexico_logo.pdf}
-    \hfill\break
-  $endif$$endif$
   $if(distro)$
-    $if(unmlogo)$$else$$if(avlogo)$$else$
+    $if(unmlogo)$$else$
       \vfill
-    $endif$$endif$
+    $endif$
     {$distro$}\par
   $endif$
   $if(rev)$

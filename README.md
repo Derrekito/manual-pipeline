@@ -47,6 +47,36 @@ Centralized Pandoc + LaTeX documentation pipeline for generating PDF/DOCX manual
    make pdf
    ```
 
+## Organization Logos
+
+Logos are configured via `logos.yaml` (git-ignored for privacy). This allows you to add organization logos without committing proprietary assets.
+
+1. Copy the example:
+   ```bash
+   cp logos.yaml.example logos.yaml
+   ```
+
+2. Edit `logos.yaml` to define your logos:
+   ```yaml
+   logos:
+     - key: myorglogo
+       file: my_organization_logo.pdf
+       width: 0.25\textwidth
+       description: My Organization
+   ```
+
+3. Place logo files in `assets/logos/`
+
+4. Enable in document frontmatter:
+   ```yaml
+   ---
+   title: "My Manual"
+   myorglogo: true
+   ---
+   ```
+
+The `logos.yaml` file and `assets/logos/*` are git-ignored, so your proprietary logos stay private.
+
 ## Project Structure
 
 ```

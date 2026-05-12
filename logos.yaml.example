@@ -1,0 +1,25 @@
+# Logo Configuration Example
+# Copy this file to logos.yaml and customize for your organization
+#
+# Each logo entry defines:
+#   key: The frontmatter variable name (e.g., myorglogo: true)
+#   file: Path to logo file relative to assets/logos/
+#   width: LaTeX width specification (e.g., 0.25\textwidth)
+#   description: Human-readable description
+
+logos:
+  - key: mushroomlogo
+    file: Mushroom.pdf
+    width: 0.15\textwidth
+    description: Example Mushroom Logo
+
+# Additional examples:
+#  - key: myorglogo
+#    file: my_organization_logo.pdf
+#    width: 0.25\textwidth
+#    description: My Organization
+#
+#  - key: partnerlogo
+#    file: partner_logo.pdf
+#    width: 0.3\textwidth
+#    description: Partner Organization

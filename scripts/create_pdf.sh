@@ -72,7 +72,7 @@ generate_tex() {
     "${PIPELINE_DIR}/scripts/preprocess-acronyms.sh" "${IN_FILE}" > "${preprocessed}"
     trap "rm -f '${preprocessed}'" EXIT
 
-    local pandoc_cmd="pandoc \"${preprocessed}\" --from markdown+raw_tex --template=\"${template}\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/include-files.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/readme-only.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/notebook-toggle.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/nobreak-codeblock.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/md-links-to-refs.lua\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-mermaid.py\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-minted.py\" --highlight-style=pygments --trace --data-dir=\"${PROJECT_ROOT}\" --metadata output_dir=\"${MERMAID_OUTPUT_DIR}\" --verbose"
+    local pandoc_cmd="pandoc \"${preprocessed}\" --from markdown+raw_tex --template=\"${template}\" --filter=\"${PIPELINE_DIR}/scripts/inject_logos.py\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/include-files.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/readme-only.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/notebook-toggle.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/nobreak-codeblock.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/md-links-to-refs.lua\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-mermaid.py\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-minted.py\" --highlight-style=pygments --trace --data-dir=\"${PROJECT_ROOT}\" --metadata output_dir=\"${MERMAID_OUTPUT_DIR}\" --verbose"
     [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=" --toc"
     echo "Generating LaTeX from ${IN_FILE}..."
     if [ -f "${MERMAID_BIN}" ]; then
