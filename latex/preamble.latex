@@ -24,6 +24,11 @@
 \usepackage{float}
 \usepackage{wrapfig}
 \usepackage{longtable}
+% pandoc >= 3 wraps unnumbered tables in \def\LTcaptype{none}; its own
+% template defines this counter, ours must too or every table errors.
+\makeatletter
+\@ifundefined{c@none}{\newcounter{none}}{}
+\makeatother
 \usepackage{newunicodechar}
 \usepackage{listings}
 \usepackage{xcolor}
