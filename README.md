@@ -86,17 +86,20 @@ manual-pipeline/
 │   ├── template.latex     # Pandoc LaTeX template
 │   └── filters/           # Pandoc filters
 │       ├── include-files.lua
+│       ├── inline-code-breaks.lua
 │       ├── md-links-to-refs.lua
 │       ├── nobreak-codeblock.lua
 │       ├── notebook-toggle.lua
 │       ├── pandoc-mermaid.py
 │       ├── pandoc-minted.py
-│       └── readme-only.lua
+│       ├── readme-only.lua
+│       └── table-widths.lua
 ├── scripts/
 │   ├── check_deps.sh          # Dependency checker
 │   ├── create_pdf.sh          # Main build script
 │   └── preprocess-acronyms.sh # Acronym preprocessor
 ├── Makefile.include           # Include this in your Makefile
+├── tests/                     # The filters and template, run through pandoc
 └── examples/
     └── Makefile.example
 ```
@@ -131,6 +134,31 @@ Use in markdown:
 ```markdown
 The \ac{API} provides access to the \ac{CPU}.
 ```
+
+## Narrow pages and wide tables
+
+Two filters keep text inside the margins. `table-widths.lua` gives a table
+without column widths ones that wrap when its cells would not fit on one
+line; set `table-fit-chars` in the front matter (default 72) lower for a
+narrow page. `inline-code-breaks.lua` lets inline code break after
+`/ _ . - = ,`, in the same font and size `\mintinline` gives it.
+
+Settings passed with `pandoc -H file.tex`, or `header-includes` in the
+front matter, are placed last before `\begin{document}`, so they can change
+the page size, headers or image limits without copying the template:
+
+```latex
+\geometry{paperwidth=158mm, paperheight=210mm, margin=8mm, includeheadfoot}
+```
+
+## Tests
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+They run the filters and the template through pandoc, with a stand-in for
+`mmdc`, so they need pandoc but not LaTeX.
 
 ## Dependencies
 
