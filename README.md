@@ -159,6 +159,10 @@ the page size, headers or image limits without copying the template:
 \geometry{paperwidth=158mm, paperheight=210mm, margin=8mm, includeheadfoot}
 ```
 
+The body text is 11pt; `fontsize: 10pt` in the front matter, or
+`pandoc -V fontsize=10pt`, sets another size the article class has
+(10pt, 11pt or 12pt).
+
 ## Tests
 
 ```bash

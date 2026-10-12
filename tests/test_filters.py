@@ -218,6 +218,12 @@ class Template(unittest.TestCase):
         self.assertNotIn('$header-includes$', latex)
         self.assertNotIn('fromcaller', latex)
 
+    def test_font_size_is_11pt_unless_set(self):
+        template = str(PIPELINE / 'latex' / 'template.latex')
+        self.assertIn('\\documentclass[11pt]{article}', pandoc('Body.\n', '--template', template, '-M', 'title=T'))
+        self.assertIn('\\documentclass[10pt]{article}',
+                      pandoc('Body.\n', '--template', template, '-M', 'title=T', '-V', 'fontsize=10pt'))
+
 
 class Chain(unittest.TestCase):
     """The PDF build runs the new filters, in the order they need."""
