@@ -118,6 +118,9 @@ def mermaid(key: str, value: List, format_: str, meta: dict) -> Optional[dict]:
                 latex_options[k] = v
 
         filename = os.path.join(output_dir, get_filename4code("mermaid", code))
+        # get_filename4code names a mermaid-images/ subdirectory; make it here
+        # so a caller that sets output_dir need not know about it.
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         src = filename + ".mmd"
         pdf_dest = filename + ".pdf"
         code_hash = get_file_hash(code)
@@ -188,7 +191,9 @@ def mermaid(key: str, value: List, format_: str, meta: dict) -> Optional[dict]:
         elif caption:
             latex_cmd = f"\\begin{{figure}}[h]\n{img_cmd}\n\\caption{{{caption}}}\n\\end{{figure}}"
         else:
-            latex_cmd = img_cmd
+            # Full width in a paragraph would be pushed into the margin by
+            # the paragraph indent.
+            latex_cmd = "\\noindent" + img_cmd
 
         sys.stderr.write(f"DEBUG: Generated LaTeX: {latex_cmd}\n")
         return RawBlock("latex", latex_cmd)
