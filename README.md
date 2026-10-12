@@ -93,6 +93,7 @@ manual-pipeline/
 │       ├── pandoc-mermaid.py
 │       ├── pandoc-minted.py
 │       ├── readme-only.lua
+│       ├── table-scale.lua
 │       └── table-widths.lua
 ├── scripts/
 │   ├── check_deps.sh          # Dependency checker
@@ -137,11 +138,18 @@ The \ac{API} provides access to the \ac{CPU}.
 
 ## Narrow pages and wide tables
 
-Two filters keep text inside the margins. `table-widths.lua` gives a table
-without column widths ones that wrap when its cells would not fit on one
-line; set `table-fit-chars` in the front matter (default 72) lower for a
-narrow page. `inline-code-breaks.lua` lets inline code break after
-`/ _ . - = ,`, in the same font and size `\mintinline` gives it.
+Three filters keep text inside the margins. A table that is wider than
+the line is shrunk to fit: `table-widths.lua` marks it and
+`table-scale.lua` measures it in LaTeX and scales its font and column gap
+by exactly the ratio needed. It stays a longtable, so it still breaks
+across pages, and a table that fits is untouched. A table that would have
+to shrink below `table-min-scale` (default 0.6) gets wrapping columns
+instead; `table-fit-chars` (default 72) is the line length in characters
+used for that estimate, lower for a narrow page. Pipe tables whose source
+lines are long already get wrapping columns from pandoc and are left
+alone. `inline-code-breaks.lua` lets inline code break after
+`/ _ . - = ,`, in the same font as `\mintinline` and at a size relative to
+the text around it, so it shrinks with a scaled table.
 
 Settings passed with `pandoc -H file.tex`, or `header-includes` in the
 front matter, are placed last before `\begin{document}`, so they can change
@@ -158,7 +166,8 @@ python3 -m unittest discover -s tests
 ```
 
 They run the filters and the template through pandoc, with a stand-in for
-`mmdc`, so they need pandoc but not LaTeX.
+`mmdc`. One compiles a wide table with LuaLaTeX to check it fits, and is
+skipped without it.
 
 ## Dependencies
 

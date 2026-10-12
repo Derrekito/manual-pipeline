@@ -3,8 +3,10 @@ inline-code-breaks.lua - Let long inline code wrap at the end of a line
 
 \mintinline cannot break, so a long path or name in backticks runs into
 the margin, worst in table cells. For LaTeX output this sets inline code
-that has no language in the code font at the code size, the same look
-\mintinline gives it, with break points after / _ . - = and ,
+that has no language with \breakablecode (codeblocks.latex): the code
+font, the same look \mintinline gives it, at a size relative to the text
+around it, so it shrinks with a table scaled to fit. Break points go
+after / _ . - = and ,
 
 Inline code with a language class, `x`{.python}, is left for
 pandoc-minted.py to highlight. Run this before pandoc-minted.py.
@@ -27,5 +29,5 @@ function Code(code)
     table.insert(out, SPECIAL[ch] or ch)
     if BREAK[ch] then table.insert(out, '\\allowbreak{}') end
   end
-  return pandoc.RawInline('latex', '{\\codefont\\footnotesize ' .. table.concat(out) .. '}')
+  return pandoc.RawInline('latex', '\\breakablecode{' .. table.concat(out) .. '}')
 end

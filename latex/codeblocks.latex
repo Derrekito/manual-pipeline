@@ -14,6 +14,12 @@
 % Use the custom font for all minted environments
 \fvset{formatcom=\codefont}
 
+% Inline code from inline-code-breaks.lua: the code font at 0.82 of the
+% size around it (9pt in 11pt text, as \mintinline), so it shrinks with a
+% table that table-scale.lua scales to fit.
+\newcommand{\breakablecode}[1]{{\codefont
+  \fontsize{\fpeval{0.82*\csname f@size\endcsname}}{\fpeval{0.98*\csname f@size\endcsname}}\selectfont #1}}
+
 % Set minted lineno size
 \renewcommand{\theFancyVerbLine}{\scriptsize\arabic{FancyVerbLine}}
 
