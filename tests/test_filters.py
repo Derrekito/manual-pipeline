@@ -58,6 +58,25 @@ class Mermaid(unittest.TestCase):
         self.assertIn('\\begin{figure}[h]\\centering\n\\includegraphics', latex)
 
 
+@unittest.skipUnless(shutil.which('pandoc'), 'needs pandoc')
+class Template(unittest.TestCase):
+    """A caller's header settings land last before the document starts."""
+
+    def test_header_includes_follow_the_pipeline_settings(self):
+        latex = pandoc('Body.\n', '--template', str(PIPELINE / 'latex' / 'template.latex'),
+                       '-V', 'header-includes=\\newcommand{\\fromcaller}{}', '-M', 'title=T')
+        caller = latex.index('\\newcommand{\\fromcaller}{}')
+        self.assertGreater(caller, latex.index('\\setkeys{Gin}'))
+        self.assertGreater(caller, latex.index('\\captionsetup[figure]'))
+        self.assertLess(caller, latex.index('\\begin{document}'))
+
+    def test_without_header_includes_nothing_is_added(self):
+        latex = pandoc('Body.\n', '--template', str(PIPELINE / 'latex' / 'template.latex'), '-M', 'title=T')
+        self.assertNotIn('$for', latex)
+        self.assertNotIn('$header-includes$', latex)
+        self.assertNotIn('fromcaller', latex)
+
+
 if __name__ == '__main__':
     unittest.main()
 

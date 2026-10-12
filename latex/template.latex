@@ -27,6 +27,12 @@ $if(date)$
 \date{$date$}
 $endif$
 
+% Settings a caller passes with --include-in-header (-H) or header-includes,
+% last so they can change anything above: page size, headers, image limits.
+$for(header-includes)$
+$header-includes$
+$endfor$
+
 \begin{document}
 
 $if(title)$
