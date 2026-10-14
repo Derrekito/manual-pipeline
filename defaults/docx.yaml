@@ -1,0 +1,11 @@
+from: markdown+raw_tex
+to: docx
+filters:
+  - ${.}/../latex/filters/include-files.lua
+  - ${.}/../latex/filters/callouts.lua
+  - ${.}/../latex/filters/notebook-toggle.lua
+  - ${.}/../latex/filters/md-links-to-refs.lua
+  - ${.}/../latex/filters/table-widths.lua
+  - ${.}/../latex/filters/pandoc-mermaid.py
+  - ${.}/../latex/filters/pandoc-minted.py
+syntax-highlighting: pygments

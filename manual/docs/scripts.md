@@ -42,9 +42,13 @@ The script sets and uses these variables:
 1. **Validate** input file exists
 2. **Setup** paths and directories
 3. **Preprocess** Markdown with `preprocess-acronyms.sh`
-4. **Run Pandoc** with filters and template
+4. **Run Pandoc** with `defaults/pdf.yaml` or `defaults/docx.yaml`
 5. **Compile** with latexmk (for \ac{PDF}) or output directly (for \ac{DOCX})
 6. **Move** output to `output/` directory
+
+Defaults hold the reader, filters, highlighting and PDF template. The
+script passes input, output, table of contents, data directory, output
+directory metadata and logging options for each run.
 
 ### Generated Logs
 

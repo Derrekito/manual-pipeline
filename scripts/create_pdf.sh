@@ -61,7 +61,6 @@ print_log_locations() {
 
 generate_tex() {
     local toc="$1"
-    local template="${PIPELINE_DIR}/latex/template.latex"
 
     # Ensure build directory exists
     mkdir -p "${BUILD_DIR}"
@@ -72,15 +71,16 @@ generate_tex() {
     "${PIPELINE_DIR}/scripts/preprocess-acronyms.sh" "${IN_FILE}" > "${preprocessed}"
     trap "rm -f '${preprocessed}'" EXIT
 
-    local pandoc_cmd="pandoc \"${preprocessed}\" --from markdown+raw_tex --template=\"${template}\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/title-logo.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/include-files.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/callouts.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/readme-only.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/notebook-toggle.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/nobreak-codeblock.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/md-links-to-refs.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/table-widths.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/inline-code-breaks.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/table-scale.lua\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-mermaid.py\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-minted.py\" --highlight-style=pygments --trace --data-dir=\"${PROJECT_ROOT}\" --metadata output_dir=\"${MERMAID_OUTPUT_DIR}\" --verbose"
-    [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=" --toc"
+    local -a pandoc_cmd=(pandoc "${preprocessed}" --defaults "${PIPELINE_DIR}/defaults/pdf.yaml"
+        --trace --data-dir="${PROJECT_ROOT}" --metadata "output_dir=${MERMAID_OUTPUT_DIR}" --verbose)
+    [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=(--toc)
     echo "Generating LaTeX from ${IN_FILE}..."
     if [ -f "${MERMAID_BIN}" ]; then
         if ! command -v "${MERMAID_BIN}" >/dev/null 2>&1; then
             echo "Warning: Mermaid CLI (mmdc) found but not executable. Mermaid diagrams will fail."
         fi
     fi
-    eval "$pandoc_cmd -o \"${TEX_FILE}\"" > "${PANDOC_LOG}" 2>&1
+    "${pandoc_cmd[@]}" -o "${TEX_FILE}" > "${PANDOC_LOG}" 2>&1
     [ $? -ne 0 ] && { echo "Pandoc failed."; print_log_locations; cat "${PANDOC_LOG}" >&2; exit 1; }
     [ ! -s "${TEX_FILE}" ] && { echo "${TEX_FILE} empty or missing."; print_log_locations; exit 1; }
 }
@@ -95,13 +95,14 @@ generate_pdf() {
 
 generate_docx() {
     local toc="$1"
-    local pandoc_cmd="pandoc \"${IN_FILE}\" --from markdown+raw_tex --to docx --lua-filter=\"${PIPELINE_DIR}/latex/filters/include-files.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/callouts.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/notebook-toggle.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/md-links-to-refs.lua\" --lua-filter=\"${PIPELINE_DIR}/latex/filters/table-widths.lua\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-mermaid.py\" --filter=\"${PIPELINE_DIR}/latex/filters/pandoc-minted.py\" --highlight-style=pygments --data-dir=\"${PROJECT_ROOT}\" --metadata output_dir=\"${MERMAID_OUTPUT_DIR}\" --verbose"
-    [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=" --toc"
+    local -a pandoc_cmd=(pandoc "${IN_FILE}" --defaults "${PIPELINE_DIR}/defaults/docx.yaml"
+        --data-dir="${PROJECT_ROOT}" --metadata "output_dir=${MERMAID_OUTPUT_DIR}" --verbose)
+    [ -n "$toc" ] && [ "$toc" != "0" ] && pandoc_cmd+=(--toc)
     echo "Generating DOCX from ${IN_FILE}..."
     if ! command -v convert >/dev/null 2>&1; then
         echo "Warning: ImageMagick (convert) not found. Some images may not convert properly."
     fi
-    BUILD_DIR="${BUILD_DIR}" eval "$pandoc_cmd -o \"${OUTPUT_FILE}\"" > "${PANDOC_LOG}" 2>&1
+    BUILD_DIR="${BUILD_DIR}" "${pandoc_cmd[@]}" -o "${OUTPUT_FILE}" > "${PANDOC_LOG}" 2>&1
     [ $? -ne 0 ] && { echo "Pandoc failed."; print_log_locations; cat "${PANDOC_LOG}" >&2; exit 1; }
     [ ! -s "${OUTPUT_FILE}" ] && { echo "${OUTPUT_FILE} empty or missing."; print_log_locations; exit 1; }
     echo "DOCX created: ${OUTPUT_FILE}"

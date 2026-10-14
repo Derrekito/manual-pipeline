@@ -1,0 +1,18 @@
+from: markdown+raw_tex
+to: latex
+template: ${.}/../latex/template.latex
+filters:
+  - ${.}/../latex/filters/page-size.lua
+  - ${.}/../latex/filters/title-logo.lua
+  - ${.}/../latex/filters/include-files.lua
+  - ${.}/../latex/filters/callouts.lua
+  - ${.}/../latex/filters/readme-only.lua
+  - ${.}/../latex/filters/notebook-toggle.lua
+  - ${.}/../latex/filters/nobreak-codeblock.lua
+  - ${.}/../latex/filters/md-links-to-refs.lua
+  - ${.}/../latex/filters/table-widths.lua
+  - ${.}/../latex/filters/inline-code-breaks.lua
+  - ${.}/../latex/filters/table-scale.lua
+  - ${.}/../latex/filters/pandoc-mermaid.py
+  - ${.}/../latex/filters/pandoc-minted.py
+syntax-highlighting: pygments

@@ -54,14 +54,13 @@ placeholder, `example-logo.pdf`, to show where a logo goes:
 
 ```yaml
 ---
-logo: example-logo.pdf            # one logo
-logo: [ours.pdf, partner.pdf]     # or several, spread across the page
+logo: example-logo.pdf            # one logo, or [ours.pdf, partner.pdf] for several
 logo-width: 0.3\textwidth         # optional, 0.25\textwidth by default
 ---
 ```
 
-A bare file name is looked up in the project's `assets/logos/`, then the
-pipeline's. A path is taken relative to the manual directory. To use your
+A bare file name is looked up in `manual/assets/logos/` (the manual
+directory, not the project root), then the pipeline's `assets/logos/`. A path is taken relative to the manual directory. To use your
 own logo, put it in `manual/assets/logos/` and name it here; to change the
 placeholder itself, edit `assets/logos/example-logo.tex` and rebuild it with
 `lualatex example-logo.tex`.
@@ -73,7 +72,7 @@ otherwise:
 
 ```yaml
 ---
-papersize: a4                     # a4, a5, legal, ...: geometry's name without "paper"
+papersize: a4                     # a4, A4 or a4paper; also a5, legal, ...
 geometry: [margin=2cm]            # replaces the default margins
 ---
 ```

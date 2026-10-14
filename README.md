@@ -64,13 +64,13 @@ Put your own logo in your project's `manual/assets/logos/` and name it in
 `logo`. Logo files other than the example are git-ignored here, so a logo
 dropped into the pipeline's `assets/logos/` stays out of this repository.
 The placeholder is drawn by `assets/logos/example-logo.tex`; edit it and
-run `lualatex example-logo.tex` to make your own.
+run `make example-logo` from the pipeline root to rebuild it.
 
 ## Page Size
 
-US letter by default. Set `papersize: a4` (or `a5`, `legal`, ...) to
-change the paper, and `geometry: [margin=2cm]` to replace the margins or
-give a custom `paperwidth`/`paperheight`.
+US letter by default. Set `papersize: a4` (`A4` and `a4paper` work too;
+also `a5`, `legal`, ...) to change the paper, and `geometry: [margin=2cm]`
+to replace the margins or give a custom `paperwidth`/`paperheight`.
 
 ## Callouts
 
@@ -92,6 +92,9 @@ style. The box breaks across pages. See `latex/filters/callouts.lua`.
 
 ```
 manual-pipeline/
+├── defaults/             # Shared Pandoc readers, filters and output settings
+│   ├── pdf.yaml
+│   └── docx.yaml
 ├── latex/
 │   ├── preamble.latex     # LaTeX preamble (packages, fixes)
 │   ├── template.latex     # Pandoc LaTeX template
@@ -102,6 +105,7 @@ manual-pipeline/
 │       ├── md-links-to-refs.lua
 │       ├── nobreak-codeblock.lua
 │       ├── notebook-toggle.lua
+│       ├── page-size.lua
 │       ├── pandoc-mermaid.py
 │       ├── pandoc-minted.py
 │       ├── readme-only.lua
@@ -112,7 +116,9 @@ manual-pipeline/
 │   ├── check_deps.sh          # Dependency checker
 │   ├── create_pdf.sh          # Main build script
 │   └── preprocess-acronyms.sh # Acronym preprocessor
+├── Makefile                   # Pipeline development targets
 ├── Makefile.include           # Include this in your Makefile
+├── mk/                        # Colours, messages and boxed help menus (NO_COLOR=1 for plain)
 ├── tests/                     # The filters and template, run through pandoc
 └── examples/
     └── Makefile.example
@@ -179,7 +185,7 @@ The body text is 11pt; `fontsize: 10pt` in the front matter, or
 ## Tests
 
 ```bash
-python3 -m unittest discover -s tests
+make test
 ```
 
 They run the filters and the template through pandoc, with a stand-in for
@@ -196,6 +202,17 @@ skipped without it.
 Run `make check-deps` to verify.
 
 ## Make Targets
+
+From the pipeline root:
+
+| Target | Description |
+|--------|-------------|
+| `make help` | List development targets (default) |
+| `make test` | Run filter and template tests |
+| `make manual` | Generate the pipeline manual PDF |
+| `make example-logo` | Rebuild the example logo PDF |
+
+From a project's manual directory using `Makefile.include`:
 
 | Target | Description |
 |--------|-------------|

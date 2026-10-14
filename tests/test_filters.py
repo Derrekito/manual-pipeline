@@ -309,6 +309,11 @@ class PageSize(unittest.TestCase):
     def test_papersize_sets_the_paper(self):
         self.assertIn('[a4paper, top=0.5in', self.geometry('-M', 'papersize=a4'))
 
+    def test_paper_name_is_accepted_however_written(self):
+        lua = ['--lua-filter', str(FILTERS / 'page-size.lua')]
+        for name in ['a4', 'A4', 'a4paper', 'A4Paper']:
+            self.assertIn('[a4paper, top=0.5in', self.geometry(*lua, '-M', f'papersize={name}'))
+
     def test_geometry_replaces_the_margins(self):
         g = self.geometry('-M', 'geometry=margin=2cm', '-M', 'papersize=a5')
         self.assertIn('[a5paper, margin=2cm, includeheadfoot]', g)
@@ -318,12 +323,21 @@ class Chain(unittest.TestCase):
     """The PDF build runs the new filters, in the order they need."""
 
     def test_filter_order(self):
-        script = (PIPELINE / 'scripts' / 'create_pdf.sh').read_text()
-        pdf = next(line for line in script.splitlines() if 'pandoc_cmd="pandoc' in line and 'template' in line)
+        pdf = (PIPELINE / 'defaults' / 'pdf.yaml').read_text()
         order = [pdf.index(name) for name in
                  ['callouts.lua', 'table-widths.lua', 'inline-code-breaks.lua', 'table-scale.lua', 'pandoc-mermaid.py',
                   'pandoc-minted.py']]
         self.assertEqual(order, sorted(order))
+
+    def test_defaults_reference_existing_files(self):
+        for name in ['pdf.yaml', 'docx.yaml']:
+            defaults = PIPELINE / 'defaults' / name
+            paths = re.findall(r'^\s*(?:template:|-)\s+(\S+)\s*$', defaults.read_text(), re.MULTILINE)
+            self.assertTrue(paths, name)
+            for path in paths:
+                with self.subTest(defaults=name, path=path):
+                    self.assertTrue(path.startswith('${.}/'), path)
+                    self.assertTrue((defaults.parent / path.removeprefix('${.}/')).is_file(), path)
 
 
 if __name__ == '__main__':

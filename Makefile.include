@@ -39,66 +39,73 @@ SETUP_MARKER := $(VENV_DIR)/.setup_complete
 DOC_FILES := $(wildcard $(MANUAL_DIR)/docs/*.md)
 LATEX_FILES := $(wildcard $(MANUAL_DIR)/latex/*.tex) $(wildcard $(PIPELINE_DIR)/latex/*.latex)
 FILTER_FILES := $(wildcard $(PIPELINE_DIR)/latex/filters/*.lua) $(wildcard $(PIPELINE_DIR)/latex/filters/*.py)
+PANDOC_FILES := $(wildcard $(PIPELINE_DIR)/defaults/*.yaml) $(SCRIPTS_DIR)/create_pdf.sh
 
 # Export for scripts
 export MANUAL_DIR
 export PIPELINE_DIR
+
+# Colours, messages and boxed help menus
+include $(PIPELINE_DIR)/mk/colors.mk
+include $(PIPELINE_DIR)/mk/messages.mk
+include $(PIPELINE_DIR)/mk/help_menu.mk
 
 .PHONY: all help pdf docx setup check-deps clean distclean
 
 all: pdf
 
 help:
-	@echo "$(PROJECT_NAME) Manual Generation (using manual-pipeline)"
-	@echo ""
-	@echo "Targets:"
-	@echo "  make pdf        - Generate PDF manual"
-	@echo "  make docx       - Generate DOCX manual"
-	@echo "  make setup      - Install dependencies (auto-runs on first build)"
-	@echo "  make check-deps - Verify system dependencies"
-	@echo "  make clean      - Remove build artifacts"
-	@echo "  make distclean  - Remove all generated files including venv"
-	@echo ""
-	@echo "Output: $(OUTPUT_DIR)/"
+	$(call mp_help_header,$(PROJECT_NAME) Manual - manual-pipeline)
+	$(call mp_help_section,Build)
+	$(call mp_help_command,make pdf,Generate the PDF manual)
+	$(call mp_help_command,make docx,Generate the DOCX manual)
+	$(call mp_help_section,Setup)
+	$(call mp_help_command,make setup,Install dependencies (runs on first build))
+	$(call mp_help_command,make check-deps,Verify system dependencies)
+	$(call mp_help_section,Cleanup)
+	$(call mp_help_command,make clean,Remove build artifacts)
+	$(call mp_help_command,make distclean,Remove all generated files and the venv)
+	$(call mp_help_footer,Output: $(patsubst $(CURDIR)/%,%,$(OUTPUT_DIR))/)
 
 # Setup marker - created after check-deps succeeds
 $(SETUP_MARKER):
-	@echo "Running first-time setup..."
+	$(call mp_info,Running first-time setup...)
 	@$(SCRIPTS_DIR)/check_deps.sh
 	@mkdir -p $(VENV_DIR)
 	@touch $(SETUP_MARKER)
 
 setup: $(SETUP_MARKER)
-	@echo "Setup complete."
+	$(call mp_success,Setup complete)
 
 check-deps:
 	@$(SCRIPTS_DIR)/check_deps.sh
 	@touch $(SETUP_MARKER)
+	$(call mp_success,Dependencies OK)
 
 # PDF depends on setup marker - auto-runs setup if needed
-$(PDF_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(EXTRA_DEPS)
+$(PDF_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(PANDOC_FILES) $(EXTRA_DEPS)
+	$(call mp_info,Building $(notdir $(PDF_OUTPUT))...)
 	@$(SCRIPTS_DIR)/create_pdf.sh $(MASTER_DOC) 1 pdf
-	@echo ""
-	@echo "Manual generated: $(PDF_OUTPUT)"
+	$(call mp_success,Manual generated: $(PDF_OUTPUT))
 
 pdf: $(PDF_OUTPUT)
 
 # DOCX depends on setup marker - auto-runs setup if needed
-$(DOCX_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(EXTRA_DEPS)
+$(DOCX_OUTPUT): $(SETUP_MARKER) $(MASTER_DOC) $(DOC_FILES) $(LATEX_FILES) $(FILTER_FILES) $(PANDOC_FILES) $(EXTRA_DEPS)
+	$(call mp_info,Building $(notdir $(DOCX_OUTPUT))...)
 	@$(SCRIPTS_DIR)/create_pdf.sh $(MASTER_DOC) 1 docx
-	@echo ""
-	@echo "Manual generated: $(DOCX_OUTPUT)"
+	$(call mp_success,Manual generated: $(DOCX_OUTPUT))
 
 docx: $(DOCX_OUTPUT)
 
 clean:
-	@echo "Cleaning build artifacts..."
+	$(call mp_info,Cleaning build artifacts...)
 	@rm -rf $(BUILD_DIR)
-	@echo "Clean complete."
+	$(call mp_success,Clean complete)
 
 distclean: clean
-	@echo "Removing all generated files..."
+	$(call mp_warning,Removing all generated files and the venv...)
 	@rm -rf $(OUTPUT_DIR)
 	@rm -rf $(VENV_DIR)
 	@rm -f $(SETUP_MARKER)
-	@echo "Distclean complete."
+	$(call mp_success,Distclean complete)

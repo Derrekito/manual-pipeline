@@ -1,6 +1,8 @@
 % Callouts from callouts.lua: \begin{callout}{<style>}{<title>}, where the
 % style is note, tip, important, warning or caution. Colours and icons
 % follow GitHub's alerts; the box breaks across pages.
+% Needs xcolor and fontawesome5 (preamble.latex) and tcolorbox with its
+% most library (codeblocks.latex), so it comes after both in the template.
 \definecolor{callout-note}{HTML}{0969DA}
 \definecolor{callout-tip}{HTML}{1A7F37}
 \definecolor{callout-important}{HTML}{8250DF}
