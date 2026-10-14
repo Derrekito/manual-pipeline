@@ -1,27 +1,16 @@
 # Logo Assets
 
-This directory contains logo files used by the manual-pipeline logo system.
+`example-logo.pdf` is a placeholder showing where a logo goes on the title
+page. It is drawn by `example-logo.tex`; edit that and rebuild with
 
-## Example Logos
+    lualatex example-logo.tex
 
-The following files are included as examples and are safe to commit:
+Name a logo in a document's front matter to put it on the title page, or
+leave `logo` out for none:
 
-- `Mushroom.svg` / `Mushroom.pdf` - Example logo (CC BY-SA 4.0)
-- `ATTRIBUTION.md` - Attribution information for example logos
+    logo: example-logo.pdf
+    logo-width: 0.25\textwidth
 
-## Organization-Specific Logos
-
-Place your organization's logo files here. Supported formats:
-- `.pdf` (recommended for best quality)
-- `.png` 
-- `.jpg`
-
-**Note:** Organization-specific logo files are git-ignored for privacy. Only the example mushroom logo is tracked in the repository.
-
-## Configuration
-
-Logos are configured in `logos.yaml` at the repository root. See `logos.yaml.example` for the configuration format.
-
-## License
-
-See `ATTRIBUTION.md` for licensing information about example logos.
+Your own logos belong in your project's `manual/assets/logos/`, which is
+searched before this directory. Logo files here other than the example are
+git-ignored, so nothing proprietary is committed by accident.

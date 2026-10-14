@@ -47,35 +47,46 @@ Centralized Pandoc + LaTeX documentation pipeline for generating PDF/DOCX manual
    make pdf
    ```
 
-## Organization Logos
+## Logos
 
-Logos are configured via `logos.yaml` (git-ignored for privacy). This allows you to add organization logos without committing proprietary assets.
+The title page has no logo unless the front matter names one. A
+placeholder, `assets/logos/example-logo.pdf`, shows where it goes:
 
-1. Copy the example:
-   ```bash
-   cp logos.yaml.example logos.yaml
-   ```
+```yaml
+---
+title: "My Manual"
+logo: example-logo.pdf            # or [ours.pdf, partner.pdf]
+logo-width: 0.3\textwidth         # optional, 0.25\textwidth by default
+---
+```
 
-2. Edit `logos.yaml` to define your logos:
-   ```yaml
-   logos:
-     - key: myorglogo
-       file: my_organization_logo.pdf
-       width: 0.25\textwidth
-       description: My Organization
-   ```
+Put your own logo in your project's `manual/assets/logos/` and name it in
+`logo`. Logo files other than the example are git-ignored here, so a logo
+dropped into the pipeline's `assets/logos/` stays out of this repository.
+The placeholder is drawn by `assets/logos/example-logo.tex`; edit it and
+run `lualatex example-logo.tex` to make your own.
 
-3. Place logo files in `assets/logos/`
+## Page Size
 
-4. Enable in document frontmatter:
-   ```yaml
-   ---
-   title: "My Manual"
-   myorglogo: true
-   ---
-   ```
+US letter by default. Set `papersize: a4` (or `a5`, `legal`, ...) to
+change the paper, and `geometry: [margin=2cm]` to replace the margins or
+give a custom `paperwidth`/`paperheight`.
 
-The `logos.yaml` file and `assets/logos/*` are git-ignored, so your proprietary logos stay private.
+## Callouts
+
+GitHub alerts become coloured boxes in the PDF:
+
+```markdown
+> [!NOTE]
+> Example note
+
+> [!WARNING] Custom title
+> Text after the marker replaces the title.
+```
+
+`NOTE`, `TIP`, `IMPORTANT`, `WARNING` and `CAUTION` have their own colour
+and icon; other words (`NOTES`, `INFO`, `DANGER`, ...) take the nearest
+style. The box breaks across pages. See `latex/filters/callouts.lua`.
 
 ## Project Structure
 
@@ -85,6 +96,7 @@ manual-pipeline/
 │   ├── preamble.latex     # LaTeX preamble (packages, fixes)
 │   ├── template.latex     # Pandoc LaTeX template
 │   └── filters/           # Pandoc filters
+│       ├── callouts.lua
 │       ├── include-files.lua
 │       ├── inline-code-breaks.lua
 │       ├── md-links-to-refs.lua
@@ -94,7 +106,8 @@ manual-pipeline/
 │       ├── pandoc-minted.py
 │       ├── readme-only.lua
 │       ├── table-scale.lua
-│       └── table-widths.lua
+│       ├── table-widths.lua
+│       └── title-logo.lua
 ├── scripts/
 │   ├── check_deps.sh          # Dependency checker
 │   ├── create_pdf.sh          # Main build script

@@ -225,6 +225,95 @@ class Template(unittest.TestCase):
                       pandoc('Body.\n', '--template', template, '-M', 'title=T', '-V', 'fontsize=10pt'))
 
 
+@unittest.skipUnless(shutil.which('pandoc'), 'needs pandoc')
+class Callouts(unittest.TestCase):
+    """GitHub alerts become callout boxes; other block quotes stay quotes."""
+
+    lua = ['--lua-filter', str(FILTERS / 'callouts.lua')]
+
+    def test_alert_becomes_a_callout_titled_with_its_type(self):
+        latex = pandoc('> [!NOTE]\n> Example note\n', *self.lua)
+        self.assertIn('\\begin{callout}{note}{Note}', latex)
+        self.assertIn('Example note', latex)
+        self.assertIn('\\end{callout}', latex)
+        self.assertNotIn('quote', latex)
+
+    def test_each_github_type_has_its_style(self):
+        for kind in ['note', 'tip', 'important', 'warning', 'caution']:
+            self.assertIn('\\begin{callout}{%s}' % kind, pandoc(f'> [!{kind.upper()}]\n> x\n', *self.lua))
+
+    def test_other_names_take_the_nearest_style_and_keep_their_word(self):
+        self.assertIn('\\begin{callout}{note}{Notes}', pandoc('> [!NOTES]\n> x\n', *self.lua))
+        self.assertIn('\\begin{callout}{caution}{Danger}', pandoc('> [!DANGER]\n> x\n', *self.lua))
+        self.assertIn('\\begin{callout}{note}{Example}', pandoc('> [!EXAMPLE]\n> x\n', *self.lua))
+
+    def test_text_after_the_marker_is_the_title(self):
+        latex = pandoc('> [!WARNING]- Back *up* first\n> body\n>\n> more\n', *self.lua)
+        self.assertIn('\\begin{callout}{warning}{Back \\emph{up} first}', latex)
+        self.assertLess(latex.index('body'), latex.index('more'))
+
+    def test_gfm_alert_is_boxed_the_same(self):
+        latex = pandoc('> [!TIP]\n> x\n', *self.lua, reader='gfm')
+        self.assertIn('\\begin{callout}{tip}{Tip}', latex)
+
+    def test_plain_quote_is_left_alone(self):
+        self.assertIn('\\begin{quote}', pandoc('> just a [quote]\n', *self.lua))
+
+    def test_other_formats_get_a_div_with_a_bold_title(self):
+        html = pandoc('> [!NOTE]\n> x\n', *self.lua, to='html')
+        self.assertIn('<div class="callout callout-note">', html)
+        self.assertIn('<strong>Note</strong>', html)
+
+
+@unittest.skipUnless(shutil.which('pandoc'), 'needs pandoc')
+class TitleLogo(unittest.TestCase):
+    """Logos named in the front matter go on the title page; none by default."""
+
+    def title_page(self, *args):
+        latex = pandoc('Body.\n', '--template', str(PIPELINE / 'latex' / 'template.latex'),
+                       '--lua-filter', str(FILTERS / 'title-logo.lua'), '-M', 'title=T', *args)
+        return latex[latex.index('\\begin{titlepage}'):latex.index('\\end{titlepage}')]
+
+    def test_no_logo_unless_asked(self):
+        self.assertNotIn('includegraphics', self.title_page())
+        self.assertNotIn('includegraphics', self.title_page('-M', 'logo=false'))
+
+    def test_logo_file_is_used_as_written(self):
+        page = self.title_page('-M', 'logo=my_org-logo.pdf')
+        self.assertIn('\\includegraphics[width=0.25\\textwidth]{my_org-logo.pdf}', page)
+
+    def test_several_logos_and_a_width(self):
+        page = pandoc('---\ntitle: T\nlogo: [a.pdf, b.pdf]\nlogo-width: 0.3\\textwidth\n---\nBody.\n',
+                      '--template', str(PIPELINE / 'latex' / 'template.latex'),
+                      '--lua-filter', str(FILTERS / 'title-logo.lua'))
+        self.assertIn('\\includegraphics[width=0.3\\textwidth]{a.pdf}', page)
+        self.assertIn('\\includegraphics[width=0.3\\textwidth]{b.pdf}', page)
+
+    def test_example_logo_is_shipped(self):
+        self.assertTrue((PIPELINE / 'assets' / 'logos' / 'example-logo.pdf').is_file())
+
+
+@unittest.skipUnless(shutil.which('pandoc'), 'needs pandoc')
+class PageSize(unittest.TestCase):
+    """Letter with the pipeline's margins unless papersize or geometry say otherwise."""
+
+    def geometry(self, *args):
+        latex = pandoc('Body.\n', '--template', str(PIPELINE / 'latex' / 'template.latex'), *args)
+        start = latex.index('\\usepackage[', latex.index('% Letter unless'))
+        return ' '.join(latex[start:latex.index('{geometry}', start)].split())
+
+    def test_letter_by_default(self):
+        self.assertIn('[letterpaper, top=0.5in, bottom=1in, left=1in, right=1in, includeheadfoot]',
+                      self.geometry())
+
+    def test_papersize_sets_the_paper(self):
+        self.assertIn('[a4paper, top=0.5in', self.geometry('-M', 'papersize=a4'))
+
+    def test_geometry_replaces_the_margins(self):
+        g = self.geometry('-M', 'geometry=margin=2cm', '-M', 'papersize=a5')
+        self.assertIn('[a5paper, margin=2cm, includeheadfoot]', g)
+
+
 class Chain(unittest.TestCase):
     """The PDF build runs the new filters, in the order they need."""
 
@@ -232,7 +321,7 @@ class Chain(unittest.TestCase):
         script = (PIPELINE / 'scripts' / 'create_pdf.sh').read_text()
         pdf = next(line for line in script.splitlines() if 'pandoc_cmd="pandoc' in line and 'template' in line)
         order = [pdf.index(name) for name in
-                 ['table-widths.lua', 'inline-code-breaks.lua', 'table-scale.lua', 'pandoc-mermaid.py',
+                 ['callouts.lua', 'table-widths.lua', 'inline-code-breaks.lua', 'table-scale.lua', 'pandoc-mermaid.py',
                   'pandoc-minted.py']]
         self.assertEqual(order, sorted(order))
 

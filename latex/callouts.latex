@@ -1,0 +1,36 @@
+% Callouts from callouts.lua: \begin{callout}{<style>}{<title>}, where the
+% style is note, tip, important, warning or caution. Colours and icons
+% follow GitHub's alerts; the box breaks across pages.
+\definecolor{callout-note}{HTML}{0969DA}
+\definecolor{callout-tip}{HTML}{1A7F37}
+\definecolor{callout-important}{HTML}{8250DF}
+\definecolor{callout-warning}{HTML}{9A6700}
+\definecolor{callout-caution}{HTML}{CF222E}
+\newcommand{\callouticonnote}{\faInfoCircle}
+\newcommand{\callouticontip}{\faLightbulb[regular]}
+\newcommand{\callouticonimportant}{\faComment[regular]}
+\newcommand{\callouticonwarning}{\faExclamationTriangle}
+\newcommand{\callouticoncaution}{\faExclamationCircle}
+
+\newtcolorbox{callout}[2]{%
+    enhanced,
+    breakable,
+    parbox=false,
+    colback=callout-#1!5!white,
+    colframe=callout-#1,
+    boxrule=0pt,
+    leftrule=3pt,
+    arc=0pt,
+    outer arc=0pt,
+    left=10pt,
+    right=10pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=10pt,
+    after skip=10pt,
+    detach title,
+    coltitle=callout-#1,
+    fonttitle=\bfseries,
+    title={\csname callouticon#1\endcsname\enspace #2},
+    before upper={\setlength{\parindent}{0pt}\tcbtitle\par},
+}

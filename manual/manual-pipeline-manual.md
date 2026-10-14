@@ -52,6 +52,10 @@ This section documents the Pandoc filters that transform Markdown content during
 
 !include-headless docs/filters/md-links-to-refs.md
 
+## Callouts Filter
+
+!include-headless docs/filters/callouts.md
+
 ## Mermaid Filter
 
 !include-headless docs/filters/mermaid.md

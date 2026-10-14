@@ -27,9 +27,7 @@
 $logo-block$
   $endif$
   $if(distro)$
-    $if(unmlogo)$$else$
-      \vfill
-    $endif$
+    \vfill
     {$distro$}\par
   $endif$
   $if(rev)$

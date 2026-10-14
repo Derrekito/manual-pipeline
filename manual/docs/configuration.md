@@ -49,18 +49,39 @@ abstract: |
 
 ### Logo Options
 
-Logos are configured via `logos.yaml` in the pipeline root directory. Copy `logos.yaml.example` to `logos.yaml` and customize for your organization.
-
-Each logo defined in `logos.yaml` becomes a frontmatter boolean:
+The title page shows no logo unless `logo` is set. The pipeline ships one
+placeholder, `example-logo.pdf`, to show where a logo goes:
 
 ```yaml
 ---
-myorglogo: true     # Enable your custom logo
-partnerlogo: true   # Enable partner logo
+logo: example-logo.pdf            # one logo
+logo: [ours.pdf, partner.pdf]     # or several, spread across the page
+logo-width: 0.3\textwidth         # optional, 0.25\textwidth by default
 ---
 ```
 
-See `logos.yaml.example` for the logo configuration format.
+A bare file name is looked up in the project's `assets/logos/`, then the
+pipeline's. A path is taken relative to the manual directory. To use your
+own logo, put it in `manual/assets/logos/` and name it here; to change the
+placeholder itself, edit `assets/logos/example-logo.tex` and rebuild it with
+`lualatex example-logo.tex`.
+
+### Page Size
+
+Pages are US letter with 1 in side margins unless the front matter says
+otherwise:
+
+```yaml
+---
+papersize: a4                     # a4, a5, legal, ...: geometry's name without "paper"
+geometry: [margin=2cm]            # replaces the default margins
+---
+```
+
+`geometry` takes any options of the geometry package, so a custom size is
+`geometry: [paperwidth=180mm, paperheight=240mm, margin=10mm]`. Both can
+also be given on the pandoc command line with `-M`, and a later
+`\geometry{...}` in `header-includes` still overrides everything.
 
 ### Bibliography
 

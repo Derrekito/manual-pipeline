@@ -22,6 +22,7 @@ The build process flows through three stages:
                     │  ┌─────────────────────────────┐   │
                     │  │      latex/filters/         │   │
                     │  │  ├── include-files.lua      │   │
+                    │  │  ├── callouts.lua           │   │
                     │  │  ├── readme-only.lua        │   │
                     │  │  ├── notebook-toggle.lua    │   │
                     │  │  ├── nobreak-codeblock.lua  │   │
@@ -66,13 +67,15 @@ Pandoc transforms preprocessed Markdown to \ac{LaTeX} using:
 
 Filter execution order matters. The pipeline runs filters in this sequence:
 
-1. `include-files.lua` - Expand `!include` directives
-2. `readme-only.lua` - Remove \ac{README}-only sections
-3. `notebook-toggle.lua` - Handle code visibility
-4. `nobreak-codeblock.lua` - Mark non-breaking code blocks
-5. `md-links-to-refs.lua` - Convert links to \ac{LaTeX} references
-6. `pandoc-mermaid.py` - Render Mermaid diagrams
-7. `pandoc-minted.py` - Configure syntax highlighting
+1. `title-logo.lua` - Put front matter logos on the title page
+2. `include-files.lua` - Expand `!include` directives
+3. `callouts.lua` - Box `> [!NOTE]` alerts
+4. `readme-only.lua` - Remove \ac{README}-only sections
+5. `notebook-toggle.lua` - Handle code visibility
+6. `nobreak-codeblock.lua` - Mark non-breaking code blocks
+7. `md-links-to-refs.lua` - Convert links to \ac{LaTeX} references
+8. `pandoc-mermaid.py` - Render Mermaid diagrams
+9. `pandoc-minted.py` - Configure syntax highlighting
 
 ## Stage 3: LaTeX Compilation
 
@@ -129,7 +132,7 @@ The pipeline centralizes shared assets:
 manual-pipeline/
 ├── assets/
 │   ├── Fonts/           # FiraCode, Hack, Roboto
-│   └── logos/           # Organization logos
+│   └── logos/           # Example logo; add your own here
 └── config/
     ├── mermaid-config.json
     ├── mermaid.css

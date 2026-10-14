@@ -1,6 +1,10 @@
 % Core packages and Pandoc-specific patches
 % manual-pipeline: Centralized documentation pipeline
-\usepackage[letterpaper, top=0.5in, bottom=1in, left=1in, right=1in, includeheadfoot]{geometry}
+% Letter unless papersize is set (a4, a5, legal, ...: geometry's name less
+% "paper"); geometry replaces the margins, or sets paperwidth/paperheight.
+\usepackage[$if(papersize)$$papersize$paper$else$letterpaper$endif$,
+  $if(geometry)$$for(geometry)$$geometry$$sep$, $endfor$$else$top=0.5in, bottom=1in, left=1in, right=1in$endif$,
+  includeheadfoot]{geometry}
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage[printonlyused,noforwardlinks]{acronym}
 % Fix "Bad space factor" error when \Ac is used at paragraph start

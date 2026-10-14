@@ -1,6 +1,7 @@
 \documentclass[$if(fontsize)$$fontsize$$else$11pt$endif$]{article}
 ${ preamble() }
 ${ codeblocks() }
+${ callouts() }
 ${ fonts() }
 ${ styles() }
 

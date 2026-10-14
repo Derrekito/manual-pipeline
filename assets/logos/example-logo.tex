@@ -1,0 +1,15 @@
+% Example logo for the title page: a placeholder to replace with your own.
+% Rebuild the PDF after editing: lualatex example-logo.tex
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{Roboto}[Path=../Fonts/, Extension=.ttf, UprightFont=*-Regular, BoldFont=*-Bold]
+\definecolor{logoblue}{HTML}{0969DA}
+\begin{document}
+\begin{tikzpicture}
+  \fill[logoblue, rounded corners=6pt] (0,0) rectangle (2,2);
+  \fill[white] (1,1) circle (0.55);
+  \fill[logoblue] (1,1) circle (0.3);
+  \node[anchor=west, text=logoblue, font=\bfseries\fontsize{30}{30}\selectfont] at (2.3,1.25) {Example};
+  \node[anchor=west, text=black!60, font=\fontsize{16}{16}\selectfont] at (2.32,0.45) {Your Logo Here};
+\end{tikzpicture}
+\end{document}

@@ -211,19 +211,16 @@ Custom title page with optional logos and metadata.
 
 ### Logo Placement
 
-The title page supports three logo positions:
-
-- Government logo (left side)
-- Company logo (right side)
-- University logo (center bottom)
-
-### Conditional Rendering
+Logos named by the `logo` front matter key sit across the bottom of the
+title page, spaced evenly. `title-logo.lua` builds them into `logo-block`:
 
 ```text
-$if(govlogo)$
-\includegraphics[height=1in]{USSF_logo.pdf}
+$if(logo-block)$
+$logo-block$
 $endif$
 ```
+
+With no `logo` key the title page has no logo.
 
 ### Metadata Display
 

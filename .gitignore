@@ -3,17 +3,14 @@ build/
 output/
 venv/
 
-# Organization-specific configuration
-logos.yaml
+# Logos other than the example stay out of the repository
 assets/logos/*.pdf
 assets/logos/*.png
 assets/logos/*.jpg
 assets/logos/*.svg
 
 # Exception: example files (allowed in repo)
-!assets/logos/Mushroom.svg
-!assets/logos/Mushroom.pdf
-!assets/logos/ATTRIBUTION.md
+!assets/logos/example-logo.pdf
 
 # Python
 __pycache__/
@@ -32,4 +29,3 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
-logos-government.yaml
