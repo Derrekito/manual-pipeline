@@ -1,6 +1,7 @@
 """The filters and the template do what their headers say, run through pandoc as the build runs them."""
 import os
 import re
+import signal
 import shutil
 import subprocess
 import tempfile
@@ -126,8 +127,11 @@ class TableScale(unittest.TestCase):
         self.addCleanup(shutil.rmtree, work)
         (work / 't.tex').write_text(self.convert('Before.\n\n' + WIDE + '\nAfter.\n', '-s', '-V', 'tables'))
         for _ in range(2):  # longtable settles its columns on the second run
-            subprocess.run(['lualatex', '-interaction=nonstopmode', '-halt-on-error', 't.tex'],
-                           cwd=work, capture_output=True, check=True, timeout=300)
+            run = subprocess.run(['lualatex', '-interaction=nonstopmode', '-halt-on-error', 't.tex'],
+                                 cwd=work, capture_output=True, text=True, timeout=300)
+            if run.returncode != 0:
+                error = run.stdout[run.stdout.find('\n!'):] if '\n!' in run.stdout else run.stdout[-2000:]
+                self.fail(f'lualatex exited {run.returncode}:\n{error[:2000]}')
         log = (work / 't.log').read_text(errors='replace')
         self.assertNotIn('Overfull \\hbox', log)
 
@@ -180,11 +184,13 @@ class Mermaid(unittest.TestCase):
     def run_filter(self, markdown):
         out = self.work / 'images'
         env = {**os.environ, 'MERMAID_BIN': str(self.mmdc)}
-        latex = subprocess.run(
+        run = subprocess.run(
             ['pandoc', '-f', 'markdown', '-t', 'latex', '--filter', str(FILTERS / 'pandoc-mermaid.py'),
              '-M', f'output_dir={out}'],
-            input=markdown, capture_output=True, text=True, check=True, env=env, cwd=self.work).stdout
-        return latex, out
+            input=markdown, capture_output=True, text=True, env=env, cwd=self.work)
+        if run.returncode != 0:
+            self.fail(f'pandoc exited {run.returncode}:\n{run.stderr[-2000:]}')
+        return run.stdout, out
 
     def test_image_directory_is_made(self):
         latex, out = self.run_filter('```mermaid\nflowchart LR\n  A --> B\n```\n')
@@ -317,6 +323,147 @@ class PageSize(unittest.TestCase):
     def test_geometry_replaces_the_margins(self):
         g = self.geometry('-M', 'geometry=margin=2cm', '-M', 'papersize=a5')
         self.assertIn('[a5paper, margin=2cm, includeheadfoot]', g)
+
+
+class DependencySetup(unittest.TestCase):
+    """Dependency setup uses the same pipeline installation as the build."""
+
+    def setUp(self):
+        self.work = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.work)
+        self.pipeline = self.work / 'pipeline files'
+        self.manual = self.work / 'manual'
+        self.bin = self.work / 'bin'
+        for directory in [self.pipeline, self.manual, self.bin]:
+            directory.mkdir()
+        for name in ['package.json', 'package-lock.json']:
+            (self.pipeline / name).write_text('{}')
+        self.calls = self.work / 'npm-calls'
+        self.executable(self.bin / 'node', '#!/bin/sh\nexit 0\n')
+        self.executable(self.bin / 'npm', '''#!/bin/sh
+printf '%s\\n' "$PWD" "$@" > "$NPM_CALLS"
+test -f package.json && test -f package-lock.json || exit 1
+test "$*" = ci || exit 1
+mkdir -p node_modules/.bin
+printf '#!/bin/sh\\nexit 0\\n' > node_modules/.bin/mmdc
+chmod +x node_modules/.bin/mmdc
+''')
+
+    def executable(self, path, source):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source)
+        path.chmod(0o755)
+
+    def setup_npm(self, docker=False):
+        return subprocess.run(
+            ['bash', '-c', f'source "$1"; is_docker() {{ return {0 if docker else 1}; }}; setup_npm',
+             'test', str(PIPELINE / 'scripts/check_deps.sh')],
+            cwd=self.manual, capture_output=True, text=True, timeout=10,
+            env={**os.environ, 'MANUAL_DIR': str(self.manual), 'PIPELINE_DIR': str(self.pipeline),
+                 'PATH': f'{self.bin}{os.pathsep}{os.environ["PATH"]}', 'NPM_CALLS': str(self.calls)})
+
+    def test_missing_or_broken_mermaid_is_installed_from_the_pipeline_lockfile(self):
+        # A working project-local mmdc must not hide a missing pipeline executable.
+        self.executable(self.manual / 'node_modules/.bin/mmdc', '#!/bin/sh\nexit 0\n')
+        for broken in [False, True]:
+            with self.subTest(broken=broken):
+                if broken:
+                    self.executable(self.pipeline / 'node_modules/.bin/mmdc', '#!/bin/sh\nexit 1\n')
+                result = self.setup_npm()
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(self.calls.read_text().splitlines(), [str(self.pipeline), 'ci'])
+                self.calls.unlink()
+
+    def test_working_pipeline_mermaid_skips_installation(self):
+        self.executable(self.pipeline / 'node_modules/.bin/mmdc', '#!/bin/sh\nexit 0\n')
+        result = self.setup_npm()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.calls.exists())
+
+    def test_docker_checks_pipeline_mermaid_without_installing(self):
+        self.executable(self.manual / 'node_modules/.bin/mmdc', '#!/bin/sh\nexit 0\n')
+        result = self.setup_npm(docker=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Warning: mmdc', result.stdout)
+        self.assertFalse(self.calls.exists())
+        self.executable(self.pipeline / 'node_modules/.bin/mmdc', '#!/bin/sh\nexit 0\n')
+        result = self.setup_npm(docker=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Mermaid CLI found.', result.stdout)
+        self.assertNotIn('Warning:', result.stdout)
+
+    def test_make_setup_and_check_deps_create_the_project_marker(self):
+        # A stub installer keeps these tests independent of installed packages.
+        pipeline = self.work / 'pipeline'
+        pipeline.mkdir()
+        (pipeline / 'mk').symlink_to(PIPELINE / 'mk', target_is_directory=True)
+        calls = self.work / 'setup-calls'
+        self.executable(pipeline / 'scripts/check_deps.sh',
+                        '#!/bin/sh\nprintf "%s\\n" "$MANUAL_DIR" "$PIPELINE_DIR" > "$SETUP_CALLS"\n')
+        (self.manual / 'Makefile').write_text(
+            f'PROJECT_NAME := fixture\nMANUAL_DIR := {self.manual}\nPIPELINE_DIR := {pipeline}\n'
+            f'include {PIPELINE / "Makefile.include"}\n')
+        marker = self.manual / 'venv/.setup_complete'
+        for target in ['setup', 'check-deps']:
+            with self.subTest(target=target):
+                result = subprocess.run(['make', target], cwd=self.manual, capture_output=True,
+                                        text=True, timeout=10, env={**os.environ, 'SETUP_CALLS': str(calls)})
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(calls.read_text().splitlines(), [str(self.manual), str(pipeline)])
+                self.assertTrue(marker.is_file())
+                shutil.rmtree(marker.parent)
+
+
+@unittest.skipUnless(shutil.which('latexmk') and shutil.which('lualatex'), 'needs latexmk and lualatex')
+class LatexErrors(unittest.TestCase):
+    """A LaTeX error exits without waiting for input, with or without a project rc."""
+
+    def test_failed_pdf_build_is_noninteractive_and_keeps_project_configuration(self):
+        work = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, work)
+        bin_dir = work / 'bin'
+        bin_dir.mkdir()
+        # Isolate LaTeX compilation from Pandoc and its filters.
+        pandoc_stub = bin_dir / 'pandoc'
+        pandoc_stub.write_text('''#!/bin/sh
+while [ "$#" -gt 0 ]; do
+    if [ "$1" = -o ]; then out=$2; shift; fi
+    shift
+done
+printf '%s\\n' '\\documentclass{article}' '\\begin{document}' '\\undefinedPipelineCommand' '\\end{document}' > "$out"
+''')
+        pandoc_stub.chmod(0o755)
+        for custom_rc in [False, True]:
+            with self.subTest(custom_rc=custom_rc):
+                manual = work / ('with-rc' if custom_rc else 'without-rc')
+                manual.mkdir()
+                source = manual / 'broken.md'
+                source.write_text('Broken LaTeX fixture.\n')
+                if custom_rc:
+                    (manual / 'latexmkrc').write_text("$lualatex = 'lualatex -draftmode %O %S';\n")
+                with (manual / 'run.log').open('w+') as output:
+                    process = subprocess.Popen(
+                        ['bash', str(PIPELINE / 'scripts/create_pdf.sh'), str(source), '0', 'pdf'],
+                        cwd=manual, stdin=subprocess.PIPE, stdout=output, stderr=subprocess.STDOUT,
+                        start_new_session=True,
+                        env={**os.environ, 'MANUAL_DIR': str(manual), 'PIPELINE_DIR': str(PIPELINE),
+                             'PATH': f'{bin_dir}{os.pathsep}{os.environ["PATH"]}'})
+                    try:
+                        # Keep stdin open: the old invocation waits at the TeX prompt.
+                        process.wait(timeout=30)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                        self.fail('LaTeX waited for input after an error')
+                    finally:
+                        process.stdin.close()
+                    output.seek(0)
+                    log = output.read()
+                self.assertNotEqual(process.returncode, 0, log)
+                self.assertIn('Undefined control sequence', (manual / 'build/broken.log').read_text())
+                self.assertIn('latexmk failed.', log)
+                if custom_rc:
+                    self.assertIn('-draftmode', log)
 
 
 class Chain(unittest.TestCase):

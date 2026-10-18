@@ -5,9 +5,10 @@
 echo "Checking and installing dependencies..."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MANUAL_DIR="$(dirname "$SCRIPT_DIR")"
-FILTER_DIR="$MANUAL_DIR/latex/filters"
-FONTS_DIR="$MANUAL_DIR/assets/Fonts"
+PIPELINE_DIR="${PIPELINE_DIR:-$(dirname "$SCRIPT_DIR")}"
+MANUAL_DIR="${MANUAL_DIR:-${PIPELINE_DIR}}"
+FILTER_DIR="$PIPELINE_DIR/latex/filters"
+FONTS_DIR="$PIPELINE_DIR/assets/Fonts"
 
 is_docker() {
   [ -f /.dockerenv ] || [ -f /run/.containerenv ]
@@ -171,35 +172,21 @@ setup_npm() {
     exit 1
   fi
 
-  cd "$MANUAL_DIR" || { echo "Failed to switch to manual directory"; exit 1; }
-
-  local npm_packages=("@mermaid-js/mermaid-cli@10.9.1")
+  local mmdc="$PIPELINE_DIR/node_modules/.bin/mmdc"
+  if "$mmdc" --version >/dev/null 2>&1; then
+    echo "Mermaid CLI found."
+    return 0
+  fi
 
   if is_docker; then
-    if ! "$MANUAL_DIR/node_modules/.bin/mmdc" --version >/dev/null 2>&1; then
-      echo "Warning: mmdc (Mermaid CLI) not found. Mermaid diagrams will not work."
-    fi
-  else
-    local need_install=false
-    if [ ! -d "node_modules/@mermaid-js" ]; then
-      need_install=true
-    fi
-
-    if [ "$need_install" = true ]; then
-      if [ ! -f "package.json" ]; then
-        echo "Creating package.json..."
-        npm init -y >/dev/null 2>&1
-      fi
-      echo "Installing Mermaid CLI..."
-      npm install "${npm_packages[@]}" --save-exact || { echo "Failed to install Mermaid CLI."; exit 1; }
-    fi
-
-    if [ -f "$MANUAL_DIR/node_modules/.bin/mmdc" ]; then
-      echo "Mermaid CLI found."
-    else
-      echo "Warning: mmdc not installed. Mermaid diagrams will not render."
-    fi
+    echo "Warning: mmdc (Mermaid CLI) not found. Mermaid diagrams will not work."
+    return 0
   fi
+
+  echo "Installing Mermaid CLI..."
+  (cd "$PIPELINE_DIR" && npm ci) || { echo "Failed to install Mermaid CLI."; exit 1; }
+  "$mmdc" --version >/dev/null 2>&1 || { echo "Failed to run Mermaid CLI."; exit 1; }
+  echo "Mermaid CLI found."
 }
 
 setup_fira_font() {
@@ -282,4 +269,6 @@ main() {
   echo "Ready to build manual from: $MANUAL_DIR"
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main
+fi

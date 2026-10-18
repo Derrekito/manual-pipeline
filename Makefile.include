@@ -70,16 +70,17 @@ help:
 # Setup marker - created after check-deps succeeds
 $(SETUP_MARKER):
 	$(call mp_info,Running first-time setup...)
-	@$(SCRIPTS_DIR)/check_deps.sh
-	@mkdir -p $(VENV_DIR)
-	@touch $(SETUP_MARKER)
+	@"$(SCRIPTS_DIR)/check_deps.sh"
+	@mkdir -p "$(VENV_DIR)"
+	@touch "$(SETUP_MARKER)"
 
 setup: $(SETUP_MARKER)
 	$(call mp_success,Setup complete)
 
 check-deps:
-	@$(SCRIPTS_DIR)/check_deps.sh
-	@touch $(SETUP_MARKER)
+	@"$(SCRIPTS_DIR)/check_deps.sh"
+	@mkdir -p "$(VENV_DIR)"
+	@touch "$(SETUP_MARKER)"
 	$(call mp_success,Dependencies OK)
 
 # PDF depends on setup marker - auto-runs setup if needed

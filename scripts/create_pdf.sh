@@ -88,7 +88,8 @@ generate_tex() {
 generate_pdf() {
     (
       cd "${MANUAL_DIR}" || exit 1
-      latexmk -verbose -lualatex -shell-escape -output-directory="${BUILD_DIR}" "${TEX_FILE}"
+      latexmk -verbose -lualatex -shell-escape -interaction=nonstopmode -halt-on-error \
+        -output-directory="${BUILD_DIR}" "${TEX_FILE}"
     ) 2>&1 | tee "${LATEXMK_LOG}"
     [ ${PIPESTATUS[0]} -ne 0 ] && { echo "latexmk failed."; print_log_locations; exit 1; }
 }
