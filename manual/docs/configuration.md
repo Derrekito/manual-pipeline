@@ -165,7 +165,6 @@ Configure headless Chrome for diagram rendering in `config/puppeteer.json`:
 
 ```json
 {
-  "executablePath": "/usr/bin/chromium",
   "args": [
     "--no-sandbox",
     "--disable-setuid-sandbox",
@@ -174,7 +173,9 @@ Configure headless Chrome for diagram rendering in `config/puppeteer.json`:
 }
 ```
 
-Adjust `executablePath` for your system's Chromium location.
+It uses the Chrome Puppeteer downloaded; add `"executablePath"` to use a
+system Chromium. A project's `.puppeteer.json` or `PUPPETEER_CFG` replaces
+this file.
 
 ## LaTeX Configuration
 

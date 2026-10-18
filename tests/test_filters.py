@@ -165,6 +165,7 @@ class InlineCodeBreaks(unittest.TestCase):
 
 
 FAKE_MMDC = """#!/bin/sh
+printf '%s\\n' "$@" > "$(dirname "$0")/args"
 while [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done
 printf '%%PDF-1.4\\n' > "$out"
 """
@@ -181,9 +182,9 @@ class Mermaid(unittest.TestCase):
         self.mmdc.write_text(FAKE_MMDC)
         self.mmdc.chmod(0o755)
 
-    def run_filter(self, markdown):
+    def run_filter(self, markdown, **extra_env):
         out = self.work / 'images'
-        env = {**os.environ, 'MERMAID_BIN': str(self.mmdc)}
+        env = {**os.environ, 'MERMAID_BIN': str(self.mmdc), **extra_env}
         run = subprocess.run(
             ['pandoc', '-f', 'markdown', '-t', 'latex', '--filter', str(FILTERS / 'pandoc-mermaid.py'),
              '-M', f'output_dir={out}'],
@@ -204,6 +205,38 @@ class Mermaid(unittest.TestCase):
     def test_centred_figure_is_unchanged(self):
         latex, _ = self.run_filter('```{.mermaid center="true"}\nflowchart LR\n  A --> B\n```\n')
         self.assertIn('\\begin{figure}[h]\\centering\n\\includegraphics', latex)
+
+    def mmdc_args(self):
+        return (self.work / 'args').read_text().splitlines()
+
+    def test_pipeline_theme_and_styling_are_applied(self):
+        config = PIPELINE / 'config' / 'mermaid-config.json'
+        css = PIPELINE / 'config' / 'mermaid.css'
+        env = {'MERMAID_FILTER_CONFIG': str(config), 'MERMAID_FILTER_MERMAID_CSS': str(css)}
+        self.run_filter('```mermaid\nflowchart LR\n  A --> B\n```\n', **env)
+        args = self.mmdc_args()
+        self.assertEqual(args[args.index('--configFile') + 1], str(config))
+        self.assertEqual(args[args.index('--cssFile') + 1], str(css))
+        self.run_filter('```{.mermaid config="own.json"}\nflowchart LR\n  C --> D\n```\n', **env)
+        args = self.mmdc_args()
+        self.assertEqual(args.count('--configFile'), 1)
+        self.assertEqual(args[args.index('--configFile') + 1], 'own.json')
+
+    def test_no_styling_flags_without_files(self):
+        self.run_filter('```mermaid\nflowchart LR\n  A --> B\n```\n',
+                        MERMAID_FILTER_CONFIG='', MERMAID_FILTER_MERMAID_CSS='', PUPPETEER_CFG='')
+        self.assertFalse({'--configFile', '--cssFile', '-p'} & set(self.mmdc_args()))
+
+    def test_project_puppeteer_file_replaces_the_pipeline_one(self):
+        cfg = str(PIPELINE / 'config' / 'puppeteer.json')
+        self.run_filter('```mermaid\nflowchart LR\n  A --> B\n```\n', PUPPETEER_CFG=cfg)
+        args = self.mmdc_args()
+        self.assertEqual(args[args.index('-p') + 1], cfg)
+        (self.work / '.puppeteer.json').write_text('{}')
+        self.run_filter('```mermaid\nflowchart LR\n  E --> F\n```\n', PUPPETEER_CFG=cfg)
+        args = self.mmdc_args()
+        self.assertEqual(args.count('-p'), 1)
+        self.assertEqual(args[args.index('-p') + 1], '.puppeteer.json')
 
 
 @unittest.skipUnless(shutil.which('pandoc'), 'needs pandoc')
@@ -464,6 +497,29 @@ printf '%s\\n' '\\documentclass{article}' '\\begin{document}' '\\undefinedPipeli
                 self.assertIn('latexmk failed.', log)
                 if custom_rc:
                     self.assertIn('-draftmode', log)
+
+
+class ProjectVenv(unittest.TestCase):
+    """The filters run with the project's venv python when there is one."""
+
+    def test_venv_comes_first_on_the_path(self):
+        work = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, work)
+        manual, bin_dir = work / 'manual', work / 'bin'
+        (manual / 'venv' / 'bin').mkdir(parents=True)
+        bin_dir.mkdir()
+        venv_python = manual / 'venv' / 'bin' / 'python3'
+        venv_python.write_text('#!/bin/sh\n')
+        venv_python.chmod(0o755)
+        pandoc_stub = bin_dir / 'pandoc'
+        pandoc_stub.write_text(f'#!/bin/sh\ncommand -v python3 > "{work}/python"\nexit 1\n')
+        pandoc_stub.chmod(0o755)
+        (manual / 'doc.md').write_text('Text.\n')
+        subprocess.run(['bash', str(PIPELINE / 'scripts/create_pdf.sh'), str(manual / 'doc.md'), '0', 'pdf'],
+                       cwd=manual, capture_output=True, timeout=60,
+                       env={**os.environ, 'MANUAL_DIR': str(manual), 'PIPELINE_DIR': str(PIPELINE),
+                            'PATH': f'{bin_dir}{os.pathsep}{os.environ["PATH"]}'})
+        self.assertEqual((work / 'python').read_text().strip(), str(venv_python))
 
 
 class Chain(unittest.TestCase):

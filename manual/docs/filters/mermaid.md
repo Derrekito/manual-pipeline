@@ -111,16 +111,24 @@ Customize diagram appearance in `config/mermaid-config.json`:
 }
 ```
 
+Every diagram gets this file and `config/mermaid.css` unless its block sets
+`config=` or `cssFile=` itself.
+
 ### Puppeteer Config
 
-Configure Chromium in `config/puppeteer.json`:
+`config/puppeteer.json` is passed to mmdc for every diagram. It turns off
+Chrome's sandbox and uses the Chrome that Puppeteer downloaded during
+`npm ci`:
 
 ```json
 {
-  "executablePath": "/usr/bin/chromium",
-  "args": ["--no-sandbox"]
+  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=none"]
 }
 ```
+
+A `.puppeteer.json` in the directory pandoc runs from takes its place, and
+`PUPPETEER_CFG` names another file. Add `"executablePath"` to use a system
+Chromium instead of the downloaded one.
 
 ## Processing
 
@@ -144,23 +152,18 @@ Check that mmdc is installed:
 ./node_modules/.bin/mmdc --version
 ```
 
-### Sandbox Errors
+### Chrome Not Found
 
-Add to `puppeteer.json`:
+Puppeteer downloads Chrome into `~/.cache/puppeteer` during `npm ci`. If
+that was skipped, run it again from the pipeline directory:
 
-```json
-{
-  "args": ["--no-sandbox", "--disable-setuid-sandbox"]
-}
+```bash
+node node_modules/puppeteer/install.js
 ```
 
-### Wrong Chromium Path
-
-Update `executablePath` in `puppeteer.json` to match your system:
-
-- Arch: `/usr/bin/chromium`
-- Ubuntu: `/usr/bin/chromium-browser`
-- Snap: `/snap/bin/chromium`
+To use a system Chromium instead, set `executablePath` in `puppeteer.json`
+(for example `/usr/bin/chromium` on Arch). Avoid Ubuntu's snap
+`chromium-browser`: its private `/tmp` breaks Puppeteer.
 
 ## Limitations
 

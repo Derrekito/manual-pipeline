@@ -100,14 +100,15 @@ def mermaid(key: str, value: List, format_: str, meta: dict) -> Optional[dict]:
             if not os.access(output_dir, os.W_OK):
                 raise OSError(f"Cannot write to {output_dir}")
 
-        cmd = [
-            MERMAID_BIN,
-            "--outputFormat",
-            "pdf",
-            "--pdfFit",
-            "--cssFile",
-            os.environ.get("MERMAID_FILTER_MERMAID_CSS", ""),
-        ]
+        cmd = [MERMAID_BIN, "--outputFormat", "pdf", "--pdfFit"]
+        # The pipeline's theme and styling, unless the block names its own.
+        keys = [k for k, _ in keyvals]
+        config = os.environ.get("MERMAID_FILTER_CONFIG")
+        if config and os.path.isfile(config) and "config" not in keys:
+            cmd.extend(["--configFile", config])
+        css = os.environ.get("MERMAID_FILTER_MERMAID_CSS")
+        if css and os.path.isfile(css) and "cssFile" not in keys:
+            cmd.extend(["--cssFile", css])
         latex_options = {}
         for k, v in keyvals:
             if k in MMDC_OPTIONS and k not in LATEX_ONLY_OPTIONS:
@@ -137,11 +138,12 @@ def mermaid(key: str, value: List, format_: str, meta: dict) -> Optional[dict]:
                 f.write(code)
 
             cmd.extend(["-i", src, "-o", pdf_dest])
-            if "puppeteer" not in [k for k, _ in keyvals]:
-                if PUPPETEER_CFG:
-                    cmd.extend(["-p", PUPPETEER_CFG])
+            # A project's .puppeteer.json beats the pipeline's.
+            if "puppeteer" not in keys:
                 if os.path.isfile(".puppeteer.json"):
                     cmd.extend(["-p", ".puppeteer.json"])
+                elif PUPPETEER_CFG and os.path.isfile(PUPPETEER_CFG):
+                    cmd.extend(["-p", PUPPETEER_CFG])
 
             sys.stderr.write(f"DEBUG: Running command: {' '.join(cmd)}\n")
             try:

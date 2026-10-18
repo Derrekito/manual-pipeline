@@ -21,8 +21,14 @@ export TEXINPUTS="${MANUAL_DIR}/assets/logos:${PIPELINE_DIR}/assets/logos:${PIPE
 export LUAFONTDIR="${PIPELINE_DIR}/assets/Fonts"
 export MERMAID_FILTER_CONFIG="${PIPELINE_DIR}/config/mermaid-config.json"
 export MERMAID_FILTER_MERMAID_CSS="${PIPELINE_DIR}/config/mermaid.css"
+export PUPPETEER_CFG="${PUPPETEER_CFG:-${PIPELINE_DIR}/config/puppeteer.json}"
 export MERMAID_BIN="${PIPELINE_DIR}/node_modules/.bin/mmdc"
 export MERMAID_OUTPUT_DIR="${BUILD_DIR}/mermaid_images"
+
+# The Python filters run as "python3"; use the venv check_deps.sh filled.
+if [ -x "${MANUAL_DIR}/venv/bin/python3" ]; then
+    export PATH="${MANUAL_DIR}/venv/bin:${PATH}"
+fi
 
 check_usage() {
     if [ -z "$1" ]; then

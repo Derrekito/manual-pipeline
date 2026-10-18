@@ -100,6 +100,19 @@ MERMAID_BIN=/path/to/node_modules/.bin/mmdc
 
 **Purpose**: Filter uses this to invoke mmdc
 
+### PUPPETEER_CFG
+
+Puppeteer configuration passed to mmdc.
+
+```bash
+PUPPETEER_CFG=/path/to/puppeteer.json make pdf
+```
+
+**Set by**: `create_pdf.sh`, to `config/puppeteer.json` unless already set
+
+**Overridden by**: a `.puppeteer.json` where pandoc runs, or a block's
+`puppeteer=` attribute
+
 ### MERMAID_OUTPUT_DIR
 
 Directory for rendered Mermaid images.

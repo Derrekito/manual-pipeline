@@ -151,11 +151,12 @@ npm install @mermaid-js/mermaid-cli@10.9.1
 
 **Cause**: Chromium security restrictions in some environments.
 
-**Solution**: Update `config/puppeteer.json`:
+**Solution**: `config/puppeteer.json` already passes `--no-sandbox`. If a
+project's `.puppeteer.json` or `PUPPETEER_CFG` replaces it, include these
+there too:
 
 ```json
 {
-  "executablePath": "/usr/bin/chromium",
   "args": [
     "--no-sandbox",
     "--disable-setuid-sandbox"
