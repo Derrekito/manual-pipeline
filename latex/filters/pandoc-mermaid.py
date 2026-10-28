@@ -17,8 +17,6 @@ from pandocfilters import (RawBlock, get_caption, get_filename4code,
 # Define options
 MMDC_OPTIONS = {
     "theme": "--theme",
-    "width": "--width",  # mmdc pixels
-    "height": "--height",
     "background": "--backgroundColor",
     "scale": "--scale",
     "config": "--configFile",
@@ -26,7 +24,8 @@ MMDC_OPTIONS = {
     "puppeteer": "--puppeteerConfigFile",
 }
 
-MMDC_FLAGS = {"pdfFit": "--pdfFit", "quiet": "--quiet"}
+# mermaid-cli 12 fits the PDF to the diagram by default; --pdfFit is gone.
+MMDC_FLAGS = {"quiet": "--quiet"}
 
 LATEX_ONLY_OPTIONS = {"width", "scale", "center", "caption"}
 
@@ -100,7 +99,7 @@ def mermaid(key: str, value: List, format_: str, meta: dict) -> Optional[dict]:
             if not os.access(output_dir, os.W_OK):
                 raise OSError(f"Cannot write to {output_dir}")
 
-        cmd = [MERMAID_BIN, "--outputFormat", "pdf", "--pdfFit"]
+        cmd = [MERMAID_BIN, "--outputFormat", "pdf"]
         # The pipeline's theme and styling, unless the block names its own.
         keys = [k for k, _ in keyvals]
         config = os.environ.get("MERMAID_FILTER_CONFIG")
